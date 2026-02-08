@@ -9,6 +9,11 @@ export interface Company {
     logo: string;
     description: string;
     description_ar?: string;
+    content?: string;
+    content_ar?: string;
+    documentFile?: string;
+    documentName?: string;
+    documentType?: string;
 }
 
 export interface Project {
