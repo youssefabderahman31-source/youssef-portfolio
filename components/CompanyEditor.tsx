@@ -105,9 +105,10 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
 
 interface Props {
     initialCompany?: Company;
+    isNew?: boolean;
 }
 
-export default function CompanyEditor({ initialCompany }: Props) {
+export default function CompanyEditor({ initialCompany, isNew = false }: Props) {
     const router = useRouter();
     const [isSaving, setIsSaving] = useState(false);
     const [activeTab, setActiveTab] = useState<'en' | 'ar'>('en');
