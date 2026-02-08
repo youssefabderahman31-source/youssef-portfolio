@@ -1,10 +1,8 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { Company, Project } from "@/lib/data";
+import type { Company, Project } from "@/lib/data";
 import { createOrUpdateCompany, saveProjectAction } from "@/lib/actions";
-import { saveCompany } from "@/lib/data";
-import { getCompanies } from "@/lib/data";
 import {
   Loader2,
   Save,
@@ -73,8 +71,9 @@ export default function ProjectEditor({ project, isNew = false }: Props) {
   useEffect(() => {
     const loadCompanies = async () => {
       try {
-        const data = await getCompanies();
-        setCompanies(data);
+        const res = await fetch('/api/admin/companies');
+        const payload = await res.json();
+        setCompanies(payload.companies || []);
       } catch (err) {
         console.error("Failed to load companies:", err);
       } finally {
@@ -172,7 +171,12 @@ export default function ProjectEditor({ project, isNew = false }: Props) {
         description_ar: newCompanyData.description_ar,
       };
 
-      await saveCompany(company);
+      // create via API
+      await fetch('/api/admin/companies', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ company })
+      });
       const savedCompany = { ...company, id: company.id || crypto.randomUUID() };
       setCompanies([...companies, savedCompany]);
       setFormData((prev) => ({ ...prev, companyId: savedCompany.id }));

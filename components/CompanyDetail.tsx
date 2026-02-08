@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Company } from "@/lib/data";
+import type { Company } from "@/lib/data";
 import { useLanguage } from "@/components/LanguageContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Send, FileText, Eye } from "lucide-react";

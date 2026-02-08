@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { Company } from "@/lib/data";
+import type { Company } from "@/lib/data";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { ArrowUpRight } from "lucide-react";

@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { useEditor, EditorContent, Editor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import ImageExtension from "@tiptap/extension-image";
-import { Company } from "@/lib/data";
+import type { Company } from "@/lib/data";
 import { createOrUpdateCompany } from "@/lib/actions";
 import { Loader2, Save, ArrowLeft, Bold, Italic, List, Heading1, Heading2, Quote, Image as ImageIcon } from "lucide-react";
 import Link from "next/link";

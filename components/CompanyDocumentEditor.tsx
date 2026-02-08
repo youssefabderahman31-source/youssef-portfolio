@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Company } from "@/lib/data";
+import type { Company } from "@/lib/data";
 import { createOrUpdateCompany } from "@/lib/actions";
 import { Loader2, Save, ArrowLeft } from "lucide-react";
 import Link from "next/link";
