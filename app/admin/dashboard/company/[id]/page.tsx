@@ -10,5 +10,5 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
         notFound();
     }
 
-    return <CompanyEditor company={company} />;
+    return <CompanyEditor initialCompany={company} />;
 }
