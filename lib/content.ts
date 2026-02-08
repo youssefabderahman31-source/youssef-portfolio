@@ -105,6 +105,7 @@ async function getLocalContent(): Promise<SiteContent> {
 
 export async function getSiteContent(): Promise<SiteContent> {
     try {
+        if (!db) return await getLocalContent();
         const doc = await db.collection('settings').doc('site-content').get();
         if (!doc.exists) {
             return await getLocalContent();
@@ -119,6 +120,7 @@ export async function getSiteContent(): Promise<SiteContent> {
 
 export async function updateSiteContent(newContent: SiteContent): Promise<void> {
     try {
+        if (!db) throw new Error('Firebase DB not initialized');
         await db.collection('settings').doc('site-content').set(newContent);
     } catch (error) {
         console.error("Failed to update Firebase site content:", error);
