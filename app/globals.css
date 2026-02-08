@@ -1,0 +1,109 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-black: #000000;
+  --color-brand-white: #f8f8f8;
+  /* Off-white for luxury feel */
+  --color-brand-yellow: #D4AF37;
+  /* Muted Gold/Yellow */
+  --color-brand-dark-gray: #0a0a0a;
+
+  --font-outfit: var(--font-outfit);
+  --font-playfair: var(--font-playfair);
+}
+
+:root {
+  --background: var(--color-brand-black);
+  --foreground: var(--color-brand-white);
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-outfit), sans-serif;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+.font-serif {
+  font-family: var(--font-playfair), serif;
+}
+
+.text-gold {
+  color: var(--color-brand-yellow);
+}
+
+.border-gold {
+  border-color: var(--color-brand-yellow);
+}
+
+.bg-gold {
+  background-color: var(--color-brand-yellow);
+}
+
+.editorial-line {
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(212, 175, 55, 0.3), transparent);
+}
+
+.bg-gradient-radial {
+  background: radial-gradient(circle, var(--tw-gradient-stops));
+}
+
+/* Custom Scrollbar for Luxury Feel */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-brand-black);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-brand-yellow);
+}
+
+/* Prose defaults for the editor content */
+.prose h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  line-height: 1.2;
+}
+
+.prose h2 {
+  font-size: 1.8rem;
+  font-weight: 600;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+}
+
+.prose p {
+  margin-bottom: 1.5rem;
+  line-height: 1.8;
+  color: #d1d5db;
+  /* gray-300 */
+}
+
+.prose strong {
+  color: #fff;
+}
+
+/* Tiptap Editor Styles */
+.ProseMirror {
+  outline: none;
+  min-height: 200px;
+}
+
+.ProseMirror p.is-editor-empty:first-child::before {
+  color: #555;
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}

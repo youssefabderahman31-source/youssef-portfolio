@@ -1,0 +1,19 @@
+<svg width="600" height="120" viewBox="0 0 600 120" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style type="text/css">
+      @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&amp;display=swap');
+      .name-part {
+        font-family: 'Playfair Display', serif;
+        font-weight: 700;
+        font-size: 32px;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+      }
+      .white { fill: white; }
+      .gold { fill: #D4AF37; }
+    </style>
+  </defs>
+  <text x="0" y="70" class="name-part white">YOUSSEF</text>
+  <text x="210" y="70" class="name-part gold">ABDELRAHMAN</text>
+</svg>
+

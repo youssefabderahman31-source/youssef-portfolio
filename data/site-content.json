@@ -1,0 +1,124 @@
+{
+  "hero": {
+    "name": "Youssef Abdelrahman",
+    "title_en": "Marketing Strategist & Copywriter",
+    "title_ar": "استراتيجي تسويق وباحث في الإدراك",
+    "intro_1_en": "I study how people think about what you sell —",
+    "intro_1_ar": "أنا أدرس كيف يفكر الناس فيما تبيعه —",
+    "intro_2_en": "then I redesign that thinking.",
+    "intro_2_ar": "ثم أعيد تصميم ذلك التفكير.",
+    "sub_1_en": "Inside the Decision.",
+    "sub_1_ar": "داخل عملية القرار.",
+    "sub_2_en": "Perception Designer.",
+    "sub_2_ar": "مصمم للإدراك.",
+    "image": "https://image2url.com/r2/default/images/1770416143350-7450a532-95e2-47db-bb9b-495c5a5b74fc.webp"
+  },
+  "why_me": {
+    "statements_en": [
+      "People don’t decide logically.",
+      "They decide based on what makes sense to them.",
+      "I study how meaning is formed.",
+      "And redesign it.",
+      "When perception changes, decisions follow."
+    ],
+    "statements_ar": [
+      "الناس لا يقررون بمنطقية.",
+      "إنهم يقررون بناءً على ما يبدو منطقيًا بالنسبة لهم.",
+      "أنا أدرس كيف يتشكل المعنى.",
+      "وأعيد تصميمه.",
+      "عندما يتغير الإدراك، تتبعه القرارات."
+    ]
+  },
+  "philosophy": {
+    "text_en": "Most products don’t fail. Their interpretation does. The message is unclear. The language doesn’t match the market. Trust is missing. I study how meaning is formed and redesign it. When perception changes, decisions follow.",
+    "text_ar": "معظم المنتجات لا تفشل؛ بل تأويلها هو ما يفشل. الرسالة غير واضحة، اللغة لا تناسب السوق، الثقة مفقودة. أنا أدرس كيف يتشكل المعنى وأعيد تصميمه. عندما يتغير الإدراك، تتبعه القرارات.",
+    "sub_en": "I work between the product and the mind.",
+    "sub_ar": "أنا أعمل بين المنتج والعقل البوشري."
+  },
+  "credibility": {
+    "lines_en": [
+      "I study how people think about what you sell.",
+      "Then I redesign that thinking.",
+      "Every message builds trust or breaks it."
+    ],
+    "lines_ar": [
+      "أنا أدرس كيف يفكر الناس فيما تبيعه.",
+      "ثم أعيد تصميم ذلك التفكير.",
+      "كل رسالة إما تبني الثقة أو تهدمها."
+    ]
+  },
+  "social": {
+    "title_en": "Where my thinking continues.",
+    "title_ar": "حيث يستمر تفكيري.",
+    "sub_en": "Ideas don’t stop on websites. They move where people scroll.",
+    "sub_ar": "الأفكار لا تتوقف عند المواقع الإلكترونية. إنها تنتقل حيث يتصفح الناس.",
+    "instagram": "https://www.instagram.com/youssef_abdrahman7?igsh=MWtkZWx6YjVmdnVleA==",
+    "linkedin": "https://www.linkedin.com/in/youssef-abderahman-90a23a301?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app",
+    "twitter": "",
+    "whatsapp": ""
+  },
+  "contact": {
+    "title_en": "If your product is good but misunderstood, that’s where I come in.",
+    "title_ar": "إذا كان منتجك ممتازاً ولكنه يساء فهمه، فهنا يأتي دوري.",
+    "btn_en": "Start a Conversation",
+    "btn_ar": "ابدأ المحادثة"
+  },
+  "what_i_design": {
+    "title_en": "What I Change",
+    "title_ar": "ما الذي أغيره",
+    "categories_en": [
+      {
+        "title": "The Message",
+        "desc": "I remove confusion."
+      },
+      {
+        "title": "The Angle",
+        "desc": "I reposition value."
+      },
+      {
+        "title": "The Language",
+        "desc": "I rewrite how brands speak."
+      },
+      {
+        "title": "The Perception",
+        "desc": "I shape what people feel before deciding."
+      }
+    ],
+    "categories_ar": [
+      {
+        "title": "الرسالة",
+        "desc": "أنا أزيل الغموض."
+      },
+      {
+        "title": "الزاوية",
+        "desc": "أعيد تموضع القيمة."
+      },
+      {
+        "title": "اللغة",
+        "desc": "أعيد كتابة طريقة حديث العلامات."
+      },
+      {
+        "title": "الإدراك",
+        "desc": "أشكل ما يشعر به الناس قبل اتخاذ القرار."
+      }
+    ]
+  },
+  "about": {
+    "who_title_en": "Who I Am",
+    "who_title_ar": "من أنا",
+    "who_text_en": "Youssef Abdelrahman. Marketing Strategist. Concept Designer of Perception.",
+    "who_text_ar": "يوسف عبدالرحمن. استراتيجي تسويق. مصمم لمفاهيم الإدراك.",
+    "think_title_en": "Inside the Decision",
+    "think_title_ar": "داخل عملية القرار",
+    "think_text_en": "I work between the product and the mind.",
+    "think_text_ar": "أنا أعمل بين المنتج والعقل البشري.",
+    "do_title_en": "What I Actually Change",
+    "do_title_ar": "ما الذي أغيره حقاً",
+    "do_text_en": "I reshape how people interpret what you sell.",
+    "do_text_ar": "أنا أعيد تشكيل كيفية تأويل الناس لما تبيعه."
+  },
+  "final_cta": {
+    "text_en": "Start a Conversation",
+    "text_ar": "ابدأ المحادثة"
+  }
+}
