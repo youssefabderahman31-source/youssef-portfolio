@@ -79,10 +79,8 @@ export default async function Dashboard() {
                                 >
                                     <Edit size={18} />
                                 </Link>
-                                <form action={async () => {
-                                    "use server";
-                                    await removeCompany(company.id);
-                                }}>
+                                <form action={removeCompany}>
+                                    <input type="hidden" name="id" value={company.id} />
                                     <button className="p-3 bg-red-900/20 text-red-500 hover:bg-red-600 hover:text-white transition-colors rounded">
                                         <Trash2 size={18} />
                                     </button>
@@ -152,10 +150,8 @@ export default async function Dashboard() {
                                                     >
                                                         <Edit size={16} />
                                                     </Link>
-                                                    <form action={async () => {
-                                                        "use server";
-                                                        await removeProject(project.id);
-                                                    }}>
+                                                    <form action={removeProject}>
+                                                        <input type="hidden" name="id" value={project.id} />
                                                         <button className="p-2 bg-red-900/20 text-red-500 hover:bg-red-600 hover:text-white transition-colors rounded">
                                                             <Trash2 size={16} />
                                                         </button>

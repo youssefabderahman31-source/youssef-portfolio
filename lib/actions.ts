@@ -50,13 +50,23 @@ export async function createOrUpdateCompany(company: Company) {
     redirect('/admin/dashboard');
 }
 
-export async function removeCompany(id: string) {
+export async function removeCompany(formData: FormData) {
     const cookieStore = await cookies();
     if (!cookieStore.get('admin_token')) {
         throw new Error("Unauthorized");
     }
 
-    await deleteCompany(id);
+    const id = formData.get('id') as string;
+    if (!id) {
+        throw new Error("Company ID is required");
+    }
+
+    try {
+        await deleteCompany(id);
+    } catch (error) {
+        console.error('Error deleting company:', error);
+        throw error;
+    }
     redirect('/admin/dashboard');
 }
 
@@ -91,13 +101,23 @@ export async function saveProjectAction(project: Project) {
     redirect('/admin/dashboard');
 }
 
-export async function removeProject(id: string) {
+export async function removeProject(formData: FormData) {
     const cookieStore = await cookies();
     if (!cookieStore.get('admin_token')) {
         throw new Error("Unauthorized");
     }
 
-    await deleteProject(id);
+    const id = formData.get('id') as string;
+    if (!id) {
+        throw new Error("Project ID is required");
+    }
+
+    try {
+        await deleteProject(id);
+    } catch (error) {
+        console.error('Error deleting project:', error);
+        throw error;
+    }
     redirect('/admin/dashboard');
 }
 

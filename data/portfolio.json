@@ -1,25 +1,3 @@
 {
-  "companies": [
-    {
-      "id": "fc64db19-f15d-4459-a6b0-62c74f07acb8",
-      "slug": "condor",
-      "name": "Condor",
-      "logo": "/uploads/1770559165105-download.jfif",
-      "description": "تصميم وتطوير متقدم",
-      "description_ar": "حل تسويقي متكامل"
-    }
-  ],
-  "projects": [
-    {
-      "id": "proj-001",
-      "slug": "condor-mask",
-      "name": "Condor Mask",
-      "description": "مشروع تصميم الشعار",
-      "description_ar": "تصميم شعار احترافي",
-      "companyId": "fc64db19-f15d-4459-a6b0-62c74f07acb8",
-      "documentFile": "/documents/1770559107406-Condor - mask.pdf",
-      "documentName": "Condor - mask.pdf",
-      "documentType": "application/pdf"
-    }
-  ]
+  "companies": []
 }
