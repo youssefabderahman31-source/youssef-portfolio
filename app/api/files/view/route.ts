@@ -1,0 +1,61 @@
+import { NextRequest, NextResponse } from 'next/server';
+import fs from 'fs/promises';
+import path from 'path';
+
+export async function GET(req: NextRequest) {
+    try {
+        const url = new URL(req.url);
+        const filename = url.searchParams.get('file');
+
+        if (!filename) {
+            return NextResponse.json({ error: 'No file specified' }, { status: 400 });
+        }
+
+        // Prevent directory traversal attacks
+        if (filename.includes('..') || filename.includes('/')) {
+            return NextResponse.json({ error: 'Invalid filename' }, { status: 400 });
+        }
+
+        const filePath = path.join(process.cwd(), 'public', 'uploads', filename);
+        
+        try {
+            const fileBuffer = await fs.readFile(filePath);
+            const mimeType = getMimeType(filename);
+
+            return new NextResponse(fileBuffer, {
+                status: 200,
+                headers: {
+                    'Content-Type': mimeType,
+                    'Content-Disposition': `inline; filename="${filename}"`,
+                    'Cache-Control': 'public, max-age=3600',
+                    'Access-Control-Allow-Origin': '*',
+                },
+            });
+        } catch (error) {
+            console.error(`File not found: ${filePath}`, error);
+            return NextResponse.json({ error: 'File not found' }, { status: 404 });
+        }
+    } catch (error) {
+        console.error('View file error:', error);
+        return NextResponse.json({ error: 'Failed to view file' }, { status: 500 });
+    }
+}
+
+function getMimeType(filename: string): string {
+    const ext = path.extname(filename).toLowerCase();
+    const mimeTypes: Record<string, string> = {
+        '.pdf': 'application/pdf',
+        '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        '.doc': 'application/msword',
+        '.xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        '.xls': 'application/vnd.ms-excel',
+        '.pptx': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+        '.ppt': 'application/vnd.ms-powerpoint',
+        '.txt': 'text/plain',
+        '.jpg': 'image/jpeg',
+        '.jpeg': 'image/jpeg',
+        '.png': 'image/png',
+        '.gif': 'image/gif',
+    };
+    return mimeTypes[ext] || 'application/octet-stream';
+}

@@ -2,7 +2,7 @@
 
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { saveCompany, deleteCompany, Company } from './data';
+import { saveCompany, deleteCompany, Company, saveProject, deleteProject, Project } from './data';
 import { updateSiteContent, SiteContent } from './content';
 
 export async function login(prevState: { message: string } | null | undefined, formData: FormData) {
@@ -67,3 +67,37 @@ export async function saveSiteContent(content: SiteContent) {
     }
     await updateSiteContent(content);
 }
+
+export async function saveProjectAction(project: Project) {
+    const cookieStore = await cookies();
+    if (!cookieStore.get('admin_token')) {
+        throw new Error("Unauthorized");
+    }
+
+    // Basic validation
+    if (!project.name) throw new Error("Name is required");
+    if (!project.companyId) throw new Error("Company is required");
+
+    // Auto-generate ID/Slug if missing
+    if (!project.id) {
+        project.id = crypto.randomUUID();
+    }
+    if (!project.slug) {
+        project.slug = project.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+    }
+
+    await saveProject(project);
+    // Revalidate paths if needed, or just redirect
+    redirect('/admin/dashboard');
+}
+
+export async function removeProject(id: string) {
+    const cookieStore = await cookies();
+    if (!cookieStore.get('admin_token')) {
+        throw new Error("Unauthorized");
+    }
+
+    await deleteProject(id);
+    redirect('/admin/dashboard');
+}
+

@@ -105,8 +105,20 @@ export default function HomePage({ content, companies }: Props) {
         <div ref={containerRef} className={`relative bg-black text-brand-white selection:bg-brand-yellow selection:text-black font-outfit ${isAr ? 'rtl' : 'ltr'}`}>
 
             {/* 1. HERO — IDENTITY & POSITIONING */}
-            <section className="relative h-[90vh] flex items-center justify-center overflow-hidden px-8">
-                <div className="container mx-auto grid grid-cols-1 md:grid-cols-12 gap-12 items-center">
+            <section className="relative h-[90vh] flex items-center justify-center overflow-hidden px-8 before:absolute before:inset-0 before:bg-gradient-to-b before:from-transparent before:via-transparent before:to-black before:pointer-events-none before:z-[5] md:before:hidden">
+                {/* Mobile Hero Background Image */}
+                <div className="absolute inset-0 md:hidden overflow-hidden">
+                    <MotionImage
+                        src={content.hero.image}
+                        alt="Youssef Abdelrahman"
+                        width={800}
+                        height={1200}
+                        className="w-full h-full object-cover grayscale brightness-40 opacity-60"
+                        priority
+                    />
+                </div>
+
+                <div className="container mx-auto grid grid-cols-1 md:grid-cols-12 gap-12 items-center relative z-[10]">
                     <motion.div
                         initial="hidden"
                         animate="visible"
@@ -114,9 +126,16 @@ export default function HomePage({ content, companies }: Props) {
                         className="md:col-span-12 lg:col-span-7 z-10 space-y-12"
                     >
                         <div className="space-y-4">
-                            <motion.h1 variants={fadeUp} className="text-xl font-bold uppercase tracking-[0.4em] text-brand-yellow">
-                                {isAr ? "يوسف عبدالرحمن" : "Youssef Abdelrahman"}
-                            </motion.h1>
+                            <motion.div variants={fadeUp} className="w-32 md:w-40 h-auto">
+                                <Image
+                                    src="/logo.svg"
+                                    alt="Youssef Abdelrahman"
+                                    width={160}
+                                    height={48}
+                                    className="w-full h-auto object-contain brightness-110"
+                                    priority
+                                />
+                            </motion.div>
                             <motion.p variants={fadeUp} className="text-4xl md:text-6xl font-serif font-light tracking-tight leading-tight">
                                 {isAr ? "استراتيجي تسويق وكاشف للمعنى" : "Marketing Strategist & Copywriter"}
                             </motion.p>
