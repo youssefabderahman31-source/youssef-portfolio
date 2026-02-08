@@ -23,6 +23,8 @@ export async function POST(req: NextRequest) {
         const filename = `${Date.now()}-${file.name.replace(/\s+/g, '-')}`;
 
         try {
+            if (!storage) throw new Error('Firebase storage not initialized');
+
             const bucket = storage.bucket();
             const blob = bucket.file(`uploads/${filename}`);
 
