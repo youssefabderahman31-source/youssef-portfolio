@@ -222,15 +222,27 @@ export default function ProjectEditor({ project, isNew = false }: Props) {
         content_ar: "",
       };
 
-      await saveProjectAction(projectData);
-      setSuccess("تم الحفظ بنجاح!");
+      const res = await fetch('/api/admin/projects', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+        body: JSON.stringify({ project: projectData }),
+      });
 
+      const payload = await res.json();
+      if (!res.ok) {
+        setError(payload.error || payload.message || 'فشل في حفظ البيانات');
+        setIsSaving(false);
+        return;
+      }
+
+      setSuccess('تم الحفظ بنجاح!');
       setTimeout(() => {
-        router.push("/admin/dashboard");
-      }, 1500);
+        router.push('/admin/dashboard');
+      }, 1200);
     } catch (err) {
-      setError("فشل في حفظ البيانات");
       console.error(err);
+      setError('فشل في حفظ البيانات');
       setIsSaving(false);
     }
   };
