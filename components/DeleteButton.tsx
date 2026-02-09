@@ -2,7 +2,7 @@
 
 import { Trash2 } from "lucide-react";
 import { useState } from "react";
-import { removeCompany, removeProject } from "@/lib/actions";
+import { useRouter } from "next/navigation";
 
 interface DeleteButtonProps {
   id: string;
@@ -13,6 +13,7 @@ interface DeleteButtonProps {
 
 export function DeleteButton({ id, type, size = 18, className }: DeleteButtonProps) {
   const [isDeleting, setIsDeleting] = useState(false);
+  const router = useRouter();
 
   const handleDelete = async () => {
     if (!confirm(`Are you sure you want to delete this ${type}?`)) {
@@ -23,14 +24,29 @@ export function DeleteButton({ id, type, size = 18, className }: DeleteButtonPro
     try {
       const formData = new FormData();
       formData.append('id', id);
+      formData.append('type', type);
 
-      if (type === 'company') {
-        await removeCompany(formData);
-      } else {
-        await removeProject(formData);
+      const response = await fetch('/api/admin/delete', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to delete');
       }
+
+      // Refresh the page to see the changes
+      router.refresh();
+      
+      // Wait a moment for the refresh to complete, then reload
+      setTimeout(() => {
+        window.location.href = '/admin/dashboard';
+      }, 500);
     } catch (error) {
       console.error('Error deleting:', error);
+      alert(`Error: ${error instanceof Error ? error.message : 'Failed to delete'}`);
       setIsDeleting(false);
     }
   };
