@@ -177,13 +177,15 @@ export default function ProjectEditor({ project, isNew = false }: Props) {
         description_ar: newCompanyData.description_ar,
       };
 
-      // create via API
-      await fetch('/api/admin/companies', {
+      // create via API (returns the created id)
+      const res = await fetch('/api/admin/companies', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
         body: JSON.stringify({ company })
       });
-      const savedCompany = { ...company, id: company.id || crypto.randomUUID() };
+      const payload = await res.json();
+      const savedCompany = { ...company, id: payload.id || company.id || crypto.randomUUID() };
       setCompanies([...companies, savedCompany]);
       setFormData((prev) => ({ ...prev, companyId: savedCompany.id }));
       setNewCompanyData({ name: "", logo: "", description: "", description_ar: "" });

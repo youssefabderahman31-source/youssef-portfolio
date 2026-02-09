@@ -17,8 +17,13 @@ export async function POST(request: Request) {
     if (!body || !body.company) {
       return NextResponse.json({ error: 'Invalid payload' }, { status: 400 });
     }
-    await saveCompany(body.company);
-    return NextResponse.json({ success: true });
+    const company = body.company;
+    // Ensure company has an id when saved locally so client can select it immediately
+    if (!company.id) {
+      company.id = Date.now().toString();
+    }
+    await saveCompany(company);
+    return NextResponse.json({ success: true, id: company.id });
   } catch (error) {
     console.error('Failed to save company', error);
     return NextResponse.json({ error: 'Failed to save' }, { status: 500 });
