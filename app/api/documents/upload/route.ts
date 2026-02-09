@@ -3,6 +3,7 @@ import { writeFile, mkdir } from "fs/promises";
 import { join } from "path";
 import { existsSync } from "fs";
 import { cookies } from "next/headers";
+import { storage } from "@/lib/firebase-admin";
 
 const ALLOWED_TYPES = [
   "application/pdf",
@@ -57,31 +58,64 @@ export async function POST(req: NextRequest) {
 
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
+    const filename = `${Date.now()}-${file.name.replace(/\s+/g, '-')}`;
 
-    // Create uploads directory if it doesn't exist
-    const uploadDir = join(process.cwd(), "public", "documents");
-    if (!existsSync(uploadDir)) {
-      await mkdir(uploadDir, { recursive: true });
+    // Try Firebase Storage first
+    try {
+      if (!storage) throw new Error('Firebase storage not initialized');
+
+      const bucket = storage.bucket();
+      const blob = bucket.file(`documents/${filename}`);
+
+      const blobStream = blob.createWriteStream({
+        metadata: {
+          contentType: file.type,
+        },
+        resumable: false
+      });
+
+      await new Promise((resolve, reject) => {
+        blobStream.on('error', (err) => reject(err));
+        blobStream.on('finish', () => resolve(true));
+        blobStream.end(buffer);
+      });
+
+      await blob.makePublic();
+      const url = `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
+
+      return NextResponse.json(
+        {
+          message: "تم رفع الملف بنجاح",
+          url,
+          name: file.name,
+          type: file.type,
+          size: file.size,
+        },
+        { status: 200 }
+      );
+    } catch (firebaseError) {
+      console.warn('Firebase Upload failed, falling back to local storage:', firebaseError);
+
+      // Fallback to local storage
+      const uploadDir = join(process.cwd(), "public", "documents");
+      if (!existsSync(uploadDir)) {
+        await mkdir(uploadDir, { recursive: true });
+      }
+
+      const filepath = join(uploadDir, filename);
+      await writeFile(filepath, buffer);
+
+      return NextResponse.json(
+        {
+          message: "تم رفع الملف بنجاح",
+          url: `/documents/${filename}`,
+          name: file.name,
+          type: file.type,
+          size: file.size,
+        },
+        { status: 200 }
+      );
     }
-
-    // Generate unique filename
-    const timestamp = Date.now();
-    const filename = `${timestamp}-${file.name}`;
-    const filepath = join(uploadDir, filename);
-
-    // Save file
-    await writeFile(filepath, buffer);
-
-    return NextResponse.json(
-      {
-        message: "تم رفع الملف بنجاح",
-        url: `/documents/${filename}`,
-        name: file.name,
-        type: file.type,
-        size: file.size,
-      },
-      { status: 200 }
-    );
   } catch (error) {
     console.error("Document upload error:", error);
     return NextResponse.json(
