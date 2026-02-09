@@ -98,12 +98,14 @@ export default function ProjectEditor({ project, isNew = false }: Props) {
       const response = await fetch("/api/documents/upload", {
         method: "POST",
         body: formData,
+        credentials: 'same-origin',
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        setError(data.message || "فشل رفع الملف");
+        const errMsg = data.message || data.error || "فشل رفع الملف";
+        setError(errMsg);
         return;
       }
 
@@ -139,10 +141,14 @@ export default function ProjectEditor({ project, isNew = false }: Props) {
       const response = await fetch("/api/upload", {
         method: "POST",
         body: formDataObj,
+        credentials: 'same-origin',
       });
 
       const data = await response.json();
-      if (data.url) {
+      if (!response.ok) {
+        const errMsg = data.message || data.error || "فشل رفع الشعار";
+        setError(errMsg);
+      } else if (data.url) {
         setNewCompanyData((prev) => ({ ...prev, logo: data.url }));
         setSuccess("تم تحديث الشعار!");
         setTimeout(() => setSuccess(""), 3000);

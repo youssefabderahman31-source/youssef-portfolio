@@ -39,10 +39,14 @@ export default function CompanyEditor({ company, isNew = false }: Props) {
       const response = await fetch("/api/upload", {
         method: "POST",
         body: formDataObj,
+        credentials: 'same-origin',
       });
 
       const data = await response.json();
-      if (data.url) {
+      if (!response.ok) {
+        const errMsg = data.message || data.error || "فشل رفع الشعار";
+        setError(errMsg);
+      } else if (data.url) {
         setFormData((prev) => ({ ...prev, logo: data.url }));
         setSuccess("تم تحديث الشعار!");
         setTimeout(() => setSuccess(""), 3000);

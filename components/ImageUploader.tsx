@@ -25,11 +25,15 @@ export default function ImageUploader({ value, onChange, label, className }: Ima
             const res = await fetch('/api/upload', {
                 method: 'POST',
                 body: formData,
+                credentials: 'same-origin',
             });
 
-            if (!res.ok) throw new Error('Upload failed');
-
             const data = await res.json();
+            if (!res.ok) {
+                const errMsg = data.message || data.error || 'Upload failed';
+                throw new Error(errMsg);
+            }
+
             onChange(data.url);
         } catch (error) {
             console.error('Upload error:', error);
