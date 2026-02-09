@@ -94,7 +94,8 @@ export async function saveCompany(company: Company): Promise<void> {
         } else {
             companies.push(company);
         }
-        await fs.writeFile(DATA_FILE, JSON.stringify({ companies }, null, 2));
+        const projects = await getLocalProjects();
+        await fs.writeFile(DATA_FILE, JSON.stringify({ companies, projects }, null, 2));
         return;
     }
     
@@ -112,7 +113,8 @@ export async function saveCompany(company: Company): Promise<void> {
         } else {
             companies.push(company);
         }
-        await fs.writeFile(DATA_FILE, JSON.stringify({ companies }, null, 2));
+        const projects = await getLocalProjects();
+        await fs.writeFile(DATA_FILE, JSON.stringify({ companies, projects }, null, 2));
     }
 }
 
@@ -120,7 +122,8 @@ export async function deleteCompany(id: string): Promise<void> {
     if (!db) {
         let companies = await getLocalCompanies();
         companies = companies.filter(c => c.id !== id);
-        await fs.writeFile(DATA_FILE, JSON.stringify({ companies }, null, 2));
+        const projects = await getLocalProjects();
+        await fs.writeFile(DATA_FILE, JSON.stringify({ companies, projects }, null, 2));
         return;
     }
     try {
@@ -128,7 +131,8 @@ export async function deleteCompany(id: string): Promise<void> {
     } catch {
         let companies = await getLocalCompanies();
         companies = companies.filter(c => c.id !== id);
-        await fs.writeFile(DATA_FILE, JSON.stringify({ companies }, null, 2));
+        const projects = await getLocalProjects();
+        await fs.writeFile(DATA_FILE, JSON.stringify({ companies, projects }, null, 2));
     }
 }
 
