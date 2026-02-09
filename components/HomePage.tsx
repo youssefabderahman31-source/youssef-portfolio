@@ -125,7 +125,7 @@ export default function HomePage({ content, companies }: Props) {
                         variants={stagger}
                         className="md:col-span-12 lg:col-span-7 z-10 space-y-12"
                     >
-                        <div className="space-y-4">
+                        <div className="space-y-6">
                             <motion.div variants={fadeUp} className="w-32 md:w-40 h-auto">
                                 <Image
                                     src="/logo.svg"
@@ -136,7 +136,10 @@ export default function HomePage({ content, companies }: Props) {
                                     priority
                                 />
                             </motion.div>
-                            <motion.p variants={fadeUp} className="text-4xl md:text-6xl font-serif font-light tracking-tight leading-tight">
+                            <motion.h1 variants={fadeUp} className="text-5xl md:text-8xl font-bold font-serif tracking-tight leading-tight bg-gradient-to-r from-white via-white to-gray-500 bg-clip-text text-transparent">
+                                {isAr ? "يوسف عبدالرحمن" : "Youssef Abdelrahman"}
+                            </motion.h1>
+                            <motion.p variants={fadeUp} className="text-3xl md:text-5xl font-serif font-light tracking-tight leading-tight">
                                 {isAr ? "استراتيجي تسويق وكاشف للمعنى" : "Marketing Strategist & Copywriter"}
                             </motion.p>
                         </div>
@@ -246,19 +249,49 @@ export default function HomePage({ content, companies }: Props) {
             </section>
 
             {/* 4. SELECTED WORKS (LINKED) */}
-            <section className="relative py-40 px-8">
+            <section className="relative py-40 px-8 overflow-hidden bg-gradient-to-b from-black via-neutral-950 to-black">
                 <div className="container mx-auto">
-                    <div className="flex flex-col md:flex-row justify-between items-end mb-24 gap-8">
-                        <div className="space-y-4">
+                    {/* Animated Logos Background */}
+                    <div className="absolute inset-0 overflow-hidden opacity-5 pointer-events-none">
+                        <motion.div 
+                            animate={{ x: [0, -100] }}
+                            transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                            className="flex gap-12 whitespace-nowrap"
+                        >
+                            {[...companies, ...companies].map((project, idx) => (
+                                <div key={idx} className="flex-shrink-0">
+                                    {project.logo ? (
+                                        <Image src={project.logo} alt={project.name} width={200} height={100} className="h-16 w-auto object-contain brightness-50" />
+                                    ) : (
+                                        <span className="text-lg font-bold text-white/20 whitespace-nowrap">{project.name}</span>
+                                    )}
+                                </div>
+                            ))}
+                        </motion.div>
+                    </div>
+
+                    <div className="flex flex-col md:flex-row justify-between items-end mb-24 gap-8 relative z-10">
+                        <div className="space-y-6">
                             <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-brand-yellow">{isAr ? "أعمال مختارة" : "Selected Works"}</span>
-                            <h2 className="text-4xl md:text-6xl font-serif tracking-tighter italic">{isAr ? "العمل هو الدليل." : "Work is evidence."}</h2>
+                            <div className="space-y-4">
+                                <h2 className="text-5xl md:text-7xl font-serif tracking-tighter">
+                                    {isAr ? "العمل" : "Work"}
+                                </h2>
+                                <motion.h2 
+                                    animate={{ opacity: [1, 0.7, 1] }}
+                                    transition={{ duration: 3, repeat: Infinity }}
+                                    className="text-5xl md:text-7xl font-serif tracking-tighter italic text-brand-yellow"
+                                >
+                                    {isAr ? "هو الدليل." : "is evidence."}
+                                </motion.h2>
+                            </div>
                         </div>
                         <Link href="/portfolio" className="group flex items-center gap-4 text-xs font-bold uppercase tracking-widest text-white/50 hover:text-brand-yellow transition-colors duration-500">
                             {isAr ? 'استكشف الأعمال' : 'Explore Work'} <ArrowRight size={14} className={isAr ? 'rotate-180' : ''} />
                         </Link>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-12 relative z-10">
                         {companies.slice(0, 3).map((project: Company, idx: number) => (
                             <Link key={idx} href={`/portfolio/${project.slug}`} className="group relative block aspect-[4/5] bg-neutral-900 overflow-hidden rounded-sm">
                                 {project.logo ? (
