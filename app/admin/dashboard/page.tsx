@@ -81,7 +81,7 @@ export default async function Dashboard() {
                                 </Link>
                                 <form action={removeCompany}>
                                     <input type="hidden" name="id" value={company.id} />
-                                    <button className="p-3 bg-red-900/20 text-red-500 hover:bg-red-600 hover:text-white transition-colors rounded">
+                                    <button type="submit" className="p-3 bg-red-900/20 text-red-500 hover:bg-red-600 hover:text-white transition-colors rounded">
                                         <Trash2 size={18} />
                                     </button>
                                 </form>
@@ -152,7 +152,7 @@ export default async function Dashboard() {
                                                     </Link>
                                                     <form action={removeProject}>
                                                         <input type="hidden" name="id" value={project.id} />
-                                                        <button className="p-2 bg-red-900/20 text-red-500 hover:bg-red-600 hover:text-white transition-colors rounded">
+                                                        <button type="submit" className="p-2 bg-red-900/20 text-red-500 hover:bg-red-600 hover:text-white transition-colors rounded">
                                                             <Trash2 size={16} />
                                                         </button>
                                                     </form>
