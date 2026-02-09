@@ -23,14 +23,20 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
             fetch('/api/upload', {
                 method: 'POST',
                 body: formData,
+                credentials: 'include',
             })
                 .then(res => res.json())
                 .then(data => {
                     if (data.url) {
                         editor.chain().focus().setImage({ src: data.url }).run();
+                    } else if (data.error || data.message) {
+                        alert(data.message || data.error);
                     }
                 })
-                .catch(err => console.error(err));
+                .catch(err => {
+                    console.error(err);
+                    alert('Failed to upload image');
+                });
         }
     };
 

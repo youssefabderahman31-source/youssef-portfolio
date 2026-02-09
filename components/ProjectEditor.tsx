@@ -98,7 +98,7 @@ export default function ProjectEditor({ project, isNew = false }: Props) {
       const response = await fetch("/api/documents/upload", {
         method: "POST",
         body: formData,
-        credentials: 'same-origin',
+        credentials: 'include',
       });
 
       const data = await response.json();
@@ -106,6 +106,7 @@ export default function ProjectEditor({ project, isNew = false }: Props) {
       if (!response.ok) {
         const errMsg = data.message || data.error || "فشل رفع الملف";
         setError(errMsg);
+        console.error('Upload error:', data);
         return;
       }
 
@@ -119,8 +120,9 @@ export default function ProjectEditor({ project, isNew = false }: Props) {
       setSuccess("تم رفع الملف بنجاح!");
       setTimeout(() => setSuccess(""), 3000);
     } catch (err) {
-      setError("خطأ في رفع الملف");
-      console.error(err);
+      const errMsg = err instanceof Error ? err.message : "خطأ في رفع الملف";
+      setError(errMsg);
+      console.error('Upload catch error:', err);
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) {
@@ -141,13 +143,14 @@ export default function ProjectEditor({ project, isNew = false }: Props) {
       const response = await fetch("/api/upload", {
         method: "POST",
         body: formDataObj,
-        credentials: 'same-origin',
+        credentials: 'include',
       });
 
       const data = await response.json();
       if (!response.ok) {
         const errMsg = data.message || data.error || "فشل رفع الشعار";
         setError(errMsg);
+        console.error('Logo upload error:', data);
       } else if (data.url) {
         setNewCompanyData((prev) => ({ ...prev, logo: data.url }));
         setSuccess("تم تحديث الشعار!");
@@ -155,7 +158,8 @@ export default function ProjectEditor({ project, isNew = false }: Props) {
       }
     } catch (err) {
       console.error(err);
-      setError("فشل رفع الشعار");
+      const errMsg = err instanceof Error ? err.message : "فشل رفع الشعار";
+      setError(errMsg);
     } finally {
       setIsUploading(false);
     }

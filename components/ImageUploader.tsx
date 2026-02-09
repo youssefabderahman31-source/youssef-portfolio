@@ -25,7 +25,7 @@ export default function ImageUploader({ value, onChange, label, className }: Ima
             const res = await fetch('/api/upload', {
                 method: 'POST',
                 body: formData,
-                credentials: 'same-origin',
+                credentials: 'include',
             });
 
             const data = await res.json();
@@ -37,7 +37,7 @@ export default function ImageUploader({ value, onChange, label, className }: Ima
             onChange(data.url);
         } catch (error) {
             console.error('Upload error:', error);
-            alert('Failed to upload image');
+            alert(`Failed to upload image: ${error instanceof Error ? error.message : 'Unknown error'}`);
         } finally {
             setIsUploading(false);
         }

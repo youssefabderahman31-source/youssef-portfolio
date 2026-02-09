@@ -5,18 +5,18 @@ import fs from 'fs/promises';
 import path from 'path';
 
 export async function POST(req: NextRequest) {
-    // Check authorization
-    const cookieStore = await cookies();
-    if (!cookieStore.get('admin_token')) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
     try {
+        // Check authorization
+        const cookieStore = await cookies();
+        if (!cookieStore.get('admin_token')) {
+            return NextResponse.json({ error: 'Unauthorized', message: 'غير مصرح بالوصول' }, { status: 401 });
+        }
+
         const formData = await req.formData();
         const file = formData.get('file') as File;
 
         if (!file) {
-            return NextResponse.json({ error: 'No file uploaded' }, { status: 400 });
+            return NextResponse.json({ error: 'No file uploaded', message: 'لم يتم تحديد ملف' }, { status: 400 });
         }
 
         const buffer = Buffer.from(await file.arrayBuffer());
