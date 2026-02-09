@@ -2,8 +2,8 @@ import React from "react";
 import Image from "next/image";
 import { getCompanies, getProjects, getProjectsByCompany } from "@/lib/data";
 import Link from "next/link";
-import { Plus, Edit, Trash2, FileText, Briefcase } from "lucide-react";
-import { removeCompany, removeProject } from "@/lib/actions";
+import { Plus, Edit, FileText, Briefcase } from "lucide-react";
+import { DeleteButton } from "@/components/DeleteButton";
 
 export default async function Dashboard() {
     const companies = await getCompanies();
@@ -79,12 +79,7 @@ export default async function Dashboard() {
                                 >
                                     <Edit size={18} />
                                 </Link>
-                                <form action={removeCompany}>
-                                    <input type="hidden" name="id" value={company.id} />
-                                    <button type="submit" className="p-3 bg-red-900/20 text-red-500 hover:bg-red-600 hover:text-white transition-colors rounded">
-                                        <Trash2 size={18} />
-                                    </button>
-                                </form>
+                                <DeleteButton id={company.id} type="company" size={18} className="p-3 bg-red-900/20 text-red-500 hover:bg-red-600 hover:text-white transition-colors rounded" />
                             </div>
                         </div>
                     ))}
@@ -150,12 +145,7 @@ export default async function Dashboard() {
                                                     >
                                                         <Edit size={16} />
                                                     </Link>
-                                                    <form action={removeProject}>
-                                                        <input type="hidden" name="id" value={project.id} />
-                                                        <button type="submit" className="p-2 bg-red-900/20 text-red-500 hover:bg-red-600 hover:text-white transition-colors rounded">
-                                                            <Trash2 size={16} />
-                                                        </button>
-                                                    </form>
+                                                    <DeleteButton id={project.id} type="project" size={16} className="p-2 bg-red-900/20 text-red-500 hover:bg-red-600 hover:text-white transition-colors rounded" />
                                                 </div>
                                             </div>
                                         ))}
