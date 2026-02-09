@@ -8,8 +8,10 @@ export async function POST(req: NextRequest) {
     try {
         // Check authorization
         const cookieStore = await cookies();
-        if (!cookieStore.get('admin_token')) {
-            return NextResponse.json({ error: 'Unauthorized', message: 'غير مصرح بالوصول' }, { status: 401 });
+        const adminToken = cookieStore.get('admin_token');
+        if (!adminToken) {
+            console.error('No admin_token found in cookies');
+            return NextResponse.json({ error: 'Unauthorized', message: 'غير مصرح بالوصول - يرجى تسجيل الدخول من جديد' }, { status: 401 });
         }
 
         const formData = await req.formData();

@@ -15,6 +15,7 @@ export async function login(prevState: { message: string } | null | undefined, f
             secure: process.env.NODE_ENV === 'production',
             httpOnly: true,
             path: '/',
+            sameSite: 'lax',
             maxAge: 60 * 60 * 24 // 1 day
         });
         redirect('/admin/dashboard');
