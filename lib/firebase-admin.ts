@@ -2,26 +2,39 @@ import * as admin from 'firebase-admin';
 
 const initFirebase = () => {
     if (admin.apps.length > 0) {
+        console.log('✓ Firebase already initialized');
         return;
     }
 
     // Check if all required credentials are present
-    if (!process.env.FIREBASE_PROJECT_ID || !process.env.FIREBASE_CLIENT_EMAIL || !process.env.FIREBASE_PRIVATE_KEY) {
-        console.warn('⚠️ Firebase credentials not configured. Using local data fallback.');
+    const projectId = process.env.FIREBASE_PROJECT_ID;
+    const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
+    const privateKey = process.env.FIREBASE_PRIVATE_KEY;
+    const storageBucket = process.env.FIREBASE_STORAGE_BUCKET;
+
+    console.log('🔍 Checking Firebase configuration:');
+    console.log(`  FIREBASE_PROJECT_ID: ${projectId ? '✓' : '✗'}`);
+    console.log(`  FIREBASE_CLIENT_EMAIL: ${clientEmail ? '✓' : '✗'}`);
+    console.log(`  FIREBASE_PRIVATE_KEY: ${privateKey ? '✓ (' + privateKey.length + ' chars)' : '✗'}`);
+    console.log(`  FIREBASE_STORAGE_BUCKET: ${storageBucket ? '✓' : '✗'}`);
+
+    if (!projectId || !clientEmail || !privateKey || !storageBucket) {
+        console.warn('⚠️ Firebase credentials not completely configured. Uploads will fail on production.');
         return;
     }
 
     try {
         admin.initializeApp({
             credential: admin.credential.cert({
-                projectId: process.env.FIREBASE_PROJECT_ID,
-                clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-                privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+                projectId,
+                clientEmail,
+                privateKey: privateKey.replace(/\\n/g, '\n'),
             }),
-            storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+            storageBucket,
         });
+        console.log('✓ Firebase initialized successfully');
     } catch (error) {
-        console.warn('⚠️ Failed to initialize Firebase. Using local data fallback:', error);
+        console.error('✗ Failed to initialize Firebase:', error);
     }
 };
 

@@ -61,61 +61,87 @@ export async function POST(req: NextRequest) {
     const filename = `${Date.now()}-${file.name.replace(/\s+/g, '-')}`;
 
     // Try Firebase Storage first
-    try {
-      if (!storage) throw new Error('Firebase storage not initialized');
+    if (storage) {
+      try {
+        console.log('Attempting Firebase Storage upload for document:', filename);
+        const bucket = storage.bucket();
+        const blob = bucket.file(`documents/${filename}`);
 
-      const bucket = storage.bucket();
-      const blob = bucket.file(`documents/${filename}`);
+        await new Promise<void>((resolve, reject) => {
+          const blobStream = blob.createWriteStream({
+            metadata: {
+              contentType: file.type,
+            },
+            resumable: false
+          });
 
-      const blobStream = blob.createWriteStream({
-        metadata: {
-          contentType: file.type,
-        },
-        resumable: false
-      });
+          blobStream.on('error', (err) => {
+            console.error('Stream error:', err);
+            reject(err);
+          });
+          blobStream.on('finish', () => {
+            console.log('Stream finished successfully');
+            resolve();
+          });
+          blobStream.on('close', () => {
+            console.log('Stream closed');
+          });
+          
+          blobStream.end(buffer);
+        });
 
-      await new Promise((resolve, reject) => {
-        blobStream.on('error', (err) => reject(err));
-        blobStream.on('finish', () => resolve(true));
-        blobStream.end(buffer);
-      });
+        console.log('Making blob public...');
+        await blob.makePublic();
+        const url = `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
+        console.log('Firebase upload successful:', url);
 
-      await blob.makePublic();
-      const url = `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
-
-      return NextResponse.json(
-        {
-          message: "تم رفع الملف بنجاح",
-          url,
-          name: file.name,
-          type: file.type,
-          size: file.size,
-        },
-        { status: 200 }
-      );
-    } catch (firebaseError) {
-      console.warn('Firebase Upload failed, falling back to local storage:', firebaseError);
-
-      // Fallback to local storage
-      const uploadDir = join(process.cwd(), "public", "documents");
-      if (!existsSync(uploadDir)) {
-        await mkdir(uploadDir, { recursive: true });
+        return NextResponse.json(
+          {
+            message: "تم رفع الملف بنجاح",
+            url,
+            name: file.name,
+            type: file.type,
+            size: file.size,
+          },
+          { status: 200 }
+        );
+      } catch (firebaseError) {
+        console.error('Firebase Upload failed:', firebaseError);
       }
-
-      const filepath = join(uploadDir, filename);
-      await writeFile(filepath, buffer);
-
-      return NextResponse.json(
-        {
-          message: "تم رفع الملف بنجاح",
-          url: `/documents/${filename}`,
-          name: file.name,
-          type: file.type,
-          size: file.size,
-        },
-        { status: 200 }
-      );
+    } else {
+      console.warn('Firebase storage not initialized - check environment variables');
     }
+
+    // Fallback only on local development
+    if (process.env.NODE_ENV !== 'production') {
+      try {
+        console.log('Falling back to local storage (dev environment)...');
+        const uploadDir = join(process.cwd(), "public", "documents");
+        if (!existsSync(uploadDir)) {
+          await mkdir(uploadDir, { recursive: true });
+        }
+
+        const filepath = join(uploadDir, filename);
+        await writeFile(filepath, buffer);
+
+        return NextResponse.json(
+          {
+            message: "تم رفع الملف بنجاح",
+            url: `/documents/${filename}`,
+            name: file.name,
+            type: file.type,
+            size: file.size,
+          },
+          { status: 200 }
+        );
+      } catch (localError) {
+        console.error('Local storage fallback failed:', localError);
+        throw localError;
+      }
+    }
+
+    // If we reach here, Firebase failed and we're in production
+    throw new Error('Firebase Storage is not configured. Check FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, FIREBASE_PRIVATE_KEY, and FIREBASE_STORAGE_BUCKET environment variables.');
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error);
     console.error("Document upload error:", errorMsg);
