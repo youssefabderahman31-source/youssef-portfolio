@@ -31,24 +31,11 @@ export async function POST(req: NextRequest) {
                 const bucket = storage.bucket();
                 const blob = bucket.file(`uploads/${filename}`);
 
-                await new Promise<void>((resolve, reject) => {
-                    const blobStream = blob.createWriteStream({
-                        metadata: {
-                            contentType: file.type,
-                        },
-                        resumable: false
-                    });
-
-                    blobStream.on('error', (err) => {
-                        console.error('Stream error:', err);
-                        reject(err);
-                    });
-                    blobStream.on('finish', () => {
-                        console.log('Stream finished successfully');
-                        resolve();
-                    });
-                    
-                    blobStream.end(buffer);
+                console.log('Saving file to Firebase Storage...');
+                await blob.save(buffer, {
+                    metadata: {
+                        contentType: file.type,
+                    },
                 });
 
                 console.log('Making blob public...');

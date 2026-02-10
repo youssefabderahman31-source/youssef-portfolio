@@ -67,44 +67,34 @@ export async function POST(req: NextRequest) {
         const bucket = storage.bucket();
         const blob = bucket.file(`documents/${filename}`);
 
-        await new Promise<void>((resolve, reject) => {
-          const blobStream = blob.createWriteStream({
+        // Try using save() method instead of streams
+        try {
+          console.log('Saving file to Firebase Storage...');
+          await blob.save(buffer, {
             metadata: {
               contentType: file.type,
             },
-            resumable: false
-          });
-
-          blobStream.on('error', (err) => {
-            console.error('Stream error:', err);
-            reject(err);
-          });
-          blobStream.on('finish', () => {
-            console.log('Stream finished successfully');
-            resolve();
-          });
-          blobStream.on('close', () => {
-            console.log('Stream closed');
           });
           
-          blobStream.end(buffer);
-        });
+          console.log('Making blob public...');
+          await blob.makePublic();
+          const url = `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
+          console.log('Firebase upload successful:', url);
 
-        console.log('Making blob public...');
-        await blob.makePublic();
-        const url = `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
-        console.log('Firebase upload successful:', url);
-
-        return NextResponse.json(
-          {
-            message: "تم رفع الملف بنجاح",
-            url,
-            name: file.name,
-            type: file.type,
-            size: file.size,
-          },
-          { status: 200 }
-        );
+          return NextResponse.json(
+            {
+              message: "تم رفع الملف بنجاح",
+              url,
+              name: file.name,
+              type: file.type,
+              size: file.size,
+            },
+            { status: 200 }
+          );
+        } catch (saveError) {
+          console.error('Save method failed, trying stream approach:', saveError);
+          throw saveError;
+        }
       } catch (firebaseError) {
         console.error('Firebase Upload failed:', firebaseError);
       }
