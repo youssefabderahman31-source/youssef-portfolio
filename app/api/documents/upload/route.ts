@@ -117,9 +117,10 @@ export async function POST(req: NextRequest) {
       );
     }
   } catch (error) {
-    console.error("Document upload error:", error);
+    const errorMsg = error instanceof Error ? error.message : String(error);
+    console.error("Document upload error:", errorMsg);
     return NextResponse.json(
-      { message: "خطأ في رفع الملف" },
+      { message: `خطأ في رفع الملف: ${errorMsg}` },
       { status: 500 }
     );
   }
