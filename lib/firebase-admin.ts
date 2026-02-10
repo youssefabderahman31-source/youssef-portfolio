@@ -12,13 +12,15 @@ const initFirebase = () => {
 
     const projectId = process.env.FIREBASE_PROJECT_ID;
     const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
-    const privateKey = process.env.FIREBASE_PRIVATE_KEY;
+    const privateKey = process.env.FIREBASE_PRIVATE_KEY || process.env.private_key;
     const storageBucket = process.env.FIREBASE_STORAGE_BUCKET;
 
     console.log('🔍 Firebase Init Check:');
     console.log(`  projectId: ${projectId ? '✓' : '✗'}`);
     console.log(`  clientEmail: ${clientEmail ? '✓' : '✗'}`);
-    console.log(`  privateKey: ${privateKey ? `✓ (${privateKey.length} chars)` : '✗'}`);
+    console.log(`  privateKey (FIREBASE_PRIVATE_KEY): ${process.env.FIREBASE_PRIVATE_KEY ? '✓' : '✗'}`);
+    console.log(`  privateKey (private_key): ${process.env.private_key ? '✓' : '✗'}`);
+    console.log(`  privateKey (resolved): ${privateKey ? `✓ (${privateKey.length} chars)` : '✗'}`);
     console.log(`  storageBucket: ${storageBucket ? '✓' : '✗'}`);
 
     if (!projectId || !clientEmail || !privateKey || !storageBucket) {
@@ -38,8 +40,8 @@ const initFirebase = () => {
             processedKey = processedKey.slice(1, -1);
         }
         
-        // Convert escaped newlines to actual newlines
-        processedKey = processedKey.replace(/\\n/g, '\n');
+        // Convert escaped newlines to actual newlines - try both patterns
+        processedKey = processedKey.replace(/\\n/g, '\n').replace(/\\\\n/g, '\n');
         
         console.log(`  Key length: ${processedKey.length}`);
         console.log(`  Key starts with: ${processedKey.substring(0, 30)}...`);
