@@ -106,7 +106,7 @@ export default function ProjectEditor({ project, isNew = false }: Props) {
       if (!response.ok) {
         const errMsg = data.message || data.error || "فشل رفع الملف";
         setError(errMsg);
-        console.error('Upload error:', data);
+        console.error('Upload error:', errMsg, data);
         return;
       }
 
@@ -150,7 +150,7 @@ export default function ProjectEditor({ project, isNew = false }: Props) {
       if (!response.ok) {
         const errMsg = data.message || data.error || "فشل رفع الشعار";
         setError(errMsg);
-        console.error('Logo upload error:', data);
+        console.error('Logo upload error:', errMsg, data);
       } else if (data.url) {
         setNewCompanyData((prev) => ({ ...prev, logo: data.url }));
         setSuccess("تم تحديث الشعار!");

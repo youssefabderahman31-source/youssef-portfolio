@@ -67,37 +67,40 @@ export async function POST(req: NextRequest) {
     if (isFirebaseReady() && storage) {
       try {
         console.log('🔥 Attempting Firebase Storage upload...');
-        const bucket = storage.bucket();
-        console.log(`📦 Using bucket: ${bucket.name}`);
-        
-        const blob = bucket.file(`documents/${filename}`);
-        console.log(`📁 Saving to: documents/${filename}`);
 
-        await blob.save(buffer, {
-          metadata: {
-            contentType: file.type,
-          },
-        });
+        const tryBucketNames: string[] = [];
+        if (process.env.FIREBASE_STORAGE_BUCKET) tryBucketNames.push(process.env.FIREBASE_STORAGE_BUCKET as string);
+        if (process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET) tryBucketNames.push(process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET as string);
+        if (process.env.FIREBASE_PROJECT_ID) tryBucketNames.push(`${process.env.FIREBASE_PROJECT_ID}.appspot.com`);
+        tryBucketNames.push('');
 
-        console.log('🔓 Making file public...');
-        await blob.makePublic();
-        const url = `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
-        console.log(`✅ Firebase upload successful: ${url}`);
+        let lastError: any = null;
+        for (const bucketName of tryBucketNames) {
+          try {
+            const bucket = bucketName ? storage.bucket(bucketName) : storage.bucket();
+            console.log(`📦 Trying bucket: ${bucketName || '(default)'} (resolved: ${bucket.name})`);
+            const blob = bucket.file(`documents/${filename}`);
+            console.log(`📁 Saving to: documents/${filename}`);
+            await blob.save(buffer, { metadata: { contentType: file.type } });
+            await blob.makePublic();
+            const usedBucketName = bucket.name;
+            const url = `https://storage.googleapis.com/${usedBucketName}/${blob.name}`;
+            console.log(`✅ Firebase upload successful: ${url}`);
+            return NextResponse.json({ message: 'تم رفع الملف بنجاح', url, name: file.name, type: file.type, size: file.size }, { status: 200 });
+          } catch (err) {
+            console.error(`❌ Upload attempt to bucket '${bucketName || '(default)'}' failed:`, err);
+            lastError = err;
+            const msg = err instanceof Error ? err.message : String(err);
+            if (!/bucket does not exist|notFound/i.test(msg)) {
+              break;
+            }
+          }
+        }
 
-        return NextResponse.json(
-          {
-            message: "تم رفع الملف بنجاح",
-            url,
-            name: file.name,
-            type: file.type,
-            size: file.size,
-          },
-          { status: 200 }
-        );
+        console.error('❌ All Firebase bucket attempts failed');
+        if (lastError) console.error(lastError);
       } catch (firebaseError) {
-        console.error('❌ Firebase Upload failed:', firebaseError);
-        const errorMsg = firebaseError instanceof Error ? firebaseError.message : String(firebaseError);
-        console.error(`   Error: ${errorMsg}`);
+        console.error('❌ Firebase Upload failed (outer):', firebaseError);
       }
     } else {
       const fbError = getFirebaseError();
@@ -139,7 +142,29 @@ export async function POST(req: NextRequest) {
 
     // If we reach here, Firebase failed and we're in production
     const errorMsg = getFirebaseError()?.message || 'Firebase not configured';
-    throw new Error(errorMsg);
+    console.warn('⚠️ Falling back to transfer.sh because Firebase failed:', errorMsg);
+
+    // Transfer.sh fallback (temporary public storage)
+    try {
+      const transferUrl = `https://transfer.sh/${filename}`;
+      console.log(`👉 Uploading to transfer.sh: ${transferUrl}`);
+      const res = await fetch(transferUrl, {
+        method: 'PUT',
+        headers: { 'Content-Type': file.type || 'application/octet-stream' },
+        body: buffer,
+      });
+      if (!res.ok) {
+        const text = await res.text();
+        console.error('transfer.sh upload failed:', res.status, text);
+        throw new Error('transfer.sh upload failed');
+      }
+      const url = (await res.text()).trim();
+      console.log('✅ transfer.sh upload successful:', url);
+      return NextResponse.json({ message: 'تم رفع الملف بنجاح (مؤقت)', url, name: file.name, type: file.type, size: file.size }, { status: 200 });
+    } catch (fallbackErr) {
+      console.error('❌ transfer.sh fallback failed:', fallbackErr);
+      throw new Error(errorMsg);
+    }
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error);
     console.error("❌ Document upload error:", errorMsg);

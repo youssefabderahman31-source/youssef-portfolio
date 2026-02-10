@@ -25,7 +25,10 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
                 body: formData,
                 credentials: 'include',
             })
-                .then(res => res.json())
+                .then(res => {
+                    if (!res.ok) throw new Error(`Upload failed: ${res.status}`);
+                    return res.json();
+                })
                 .then(data => {
                     if (data.url) {
                         editor.chain().focus().setImage({ src: data.url }).run();
@@ -34,8 +37,9 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
                     }
                 })
                 .catch(err => {
-                    console.error(err);
-                    alert('Failed to upload image');
+                    const errMsg = err instanceof Error ? err.message : 'Failed to upload image';
+                    console.error('Image upload error:', errMsg);
+                    alert(errMsg);
                 });
         }
     };
