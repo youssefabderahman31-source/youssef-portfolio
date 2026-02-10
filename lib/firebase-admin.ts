@@ -1,62 +1,86 @@
 import * as admin from 'firebase-admin';
 
 let isInitialized = false;
+let initError: Error | null = null;
 
 const initFirebase = () => {
     if (admin.apps.length > 0) {
-        console.log('✓ Firebase already initialized');
+        console.log('✓ Firebase already initialized, apps count:', admin.apps.length);
         isInitialized = true;
         return;
     }
 
-    // Check if all required credentials are present
     const projectId = process.env.FIREBASE_PROJECT_ID;
     const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
     const privateKey = process.env.FIREBASE_PRIVATE_KEY;
     const storageBucket = process.env.FIREBASE_STORAGE_BUCKET;
 
-    console.log('🔍 Checking Firebase configuration:');
-    console.log(`  FIREBASE_PROJECT_ID: ${projectId ? '✓' : '✗'} ${projectId ? `(${projectId})` : ''}`);
-    console.log(`  FIREBASE_CLIENT_EMAIL: ${clientEmail ? '✓' : '✗'} ${clientEmail ? `(${clientEmail})` : ''}`);
-    console.log(`  FIREBASE_PRIVATE_KEY: ${privateKey ? '✓ (' + privateKey.length + ' chars)' : '✗'}`);
-    console.log(`  FIREBASE_STORAGE_BUCKET: ${storageBucket ? '✓' : '✗'} ${storageBucket ? `(${storageBucket})` : ''}`);
+    console.log('🔍 Firebase Init Check:');
+    console.log(`  projectId: ${projectId ? '✓' : '✗'}`);
+    console.log(`  clientEmail: ${clientEmail ? '✓' : '✗'}`);
+    console.log(`  privateKey: ${privateKey ? `✓ (${privateKey.length} chars)` : '✗'}`);
+    console.log(`  storageBucket: ${storageBucket ? '✓' : '✗'}`);
 
     if (!projectId || !clientEmail || !privateKey || !storageBucket) {
-        console.error('❌ Firebase credentials not completely configured.');
+        const msg = '❌ Firebase credentials incomplete!';
+        console.error(msg);
+        initError = new Error(msg);
         return;
     }
 
     try {
-        // Process the private key carefully
+        console.log('🔐 Processing private key...');
+        // Handle private key carefully - ensure proper newline conversion
         let processedKey = privateKey;
-        // Replace escaped newlines with actual newlines
-        if (typeof processedKey === 'string') {
-            processedKey = processedKey.replace(/\\n/g, '\n');
+        
+        // If the key starts and ends with quotes, remove them
+        if (processedKey.startsWith('"') && processedKey.endsWith('"')) {
+            processedKey = processedKey.slice(1, -1);
         }
+        
+        // Convert escaped newlines to actual newlines
+        processedKey = processedKey.replace(/\\n/g, '\n');
+        
+        console.log(`  Key length: ${processedKey.length}`);
+        console.log(`  Key starts with: ${processedKey.substring(0, 30)}...`);
+        console.log(`  Key ends with: ...${processedKey.substring(processedKey.length - 30)}`);
 
-        console.log('🔐 Initializing Firebase with credentials...');
+        console.log('🚀 Initializing Firebase Admin SDK...');
         const credential = admin.credential.cert({
             projectId,
             clientEmail,
             privateKey: processedKey,
         });
 
-        admin.initializeApp({
+        const app = admin.initializeApp({
             credential,
             storageBucket,
         });
-        
+
         isInitialized = true;
-        console.log('✅ Firebase initialized successfully');
+        console.log('✅ Firebase Admin SDK initialized successfully');
+        console.log(`  App name: ${app.name}`);
+        console.log(`  Apps count: ${admin.apps.length}`);
     } catch (error) {
-        console.error('❌ Failed to initialize Firebase:', error);
-        console.error('Error details:', error instanceof Error ? error.message : error);
+        const errorMsg = error instanceof Error ? error.message : String(error);
+        console.error('❌ Firebase init failed:', errorMsg);
+        console.error('Full error:', error);
+        initError = error instanceof Error ? error : new Error(errorMsg);
     }
 };
 
+// Initialize on module load
+console.log('📦 Firebase Admin module loaded');
 initFirebase();
 
 export const db = admin.apps.length > 0 ? admin.firestore() : null;
 export const storage = admin.apps.length > 0 ? admin.storage() : null;
 export const auth = admin.apps.length > 0 ? admin.auth() : null;
-export const isFirebaseReady = () => isInitialized && admin.apps.length > 0;
+
+export const isFirebaseReady = () => {
+    const ready = isInitialized && admin.apps.length > 0 && !!storage;
+    console.log(`⚡ Firebase Ready Check: ${ready ? '✓' : '✗'} (initialized: ${isInitialized}, apps: ${admin.apps.length}, storage: ${!!storage})`);
+    return ready;
+};
+
+export const getFirebaseError = () => initError;

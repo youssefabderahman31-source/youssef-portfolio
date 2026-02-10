@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { storage } from '@/lib/firebase-admin';
+import { storage, isFirebaseReady, getFirebaseError } from '@/lib/firebase-admin';
 import { cookies } from 'next/headers';
 import fs from 'fs/promises';
 import path from 'path';
@@ -24,30 +24,43 @@ export async function POST(req: NextRequest) {
         const buffer = Buffer.from(await file.arrayBuffer());
         const filename = `${Date.now()}-${file.name.replace(/\s+/g, '-')}`;
 
-        // Try Firebase Storage first
-        if (storage) {
-            try {
-                console.log('Attempting Firebase Storage upload for image:', filename);
-                const bucket = storage.bucket();
-                const blob = bucket.file(`uploads/${filename}`);
+        console.log(`🖼️ Image upload started: ${filename}`);
+        console.log(`   Firebase ready: ${isFirebaseReady()}`);
 
-                console.log('Saving file to Firebase Storage...');
+        // Try Firebase Storage first
+        if (isFirebaseReady() && storage) {
+            try {
+                console.log('🔥 Attempting Firebase Storage upload...');
+                const bucket = storage.bucket();
+                console.log(`📦 Using bucket: ${bucket.name}`);
+                
+                const blob = bucket.file(`uploads/${filename}`);
+                console.log(`📁 Saving to: uploads/${filename}`);
+
                 await blob.save(buffer, {
                     metadata: {
                         contentType: file.type,
                     },
                 });
 
-                console.log('Making blob public...');
+                console.log('🔓 Making file public...');
                 await blob.makePublic();
                 const url = `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
-                console.log('Firebase upload successful:', url);
+                console.log(`✅ Firebase upload successful: ${url}`);
                 return NextResponse.json({ url });
             } catch (firebaseError) {
-                console.error('Firebase Upload failed:', firebaseError);
+                console.error('❌ Firebase Upload failed:', firebaseError);
+                const errorMsg = firebaseError instanceof Error ? firebaseError.message : String(firebaseError);
+                console.error(`   Error: ${errorMsg}`);
             }
         } else {
-            console.warn('Firebase storage not initialized - check environment variables');
+            const fbError = getFirebaseError();
+            console.warn('⚠️ Firebase not ready or storage is null');
+            console.warn(`   isFirebaseReady: ${isFirebaseReady()}`);
+            console.warn(`   storage: ${!!storage}`);
+            if (fbError) {
+                console.warn(`   Init error: ${fbError.message}`);
+            }
         }
 
         // Fallback only on local development
@@ -70,10 +83,12 @@ export async function POST(req: NextRequest) {
         }
 
         // If we reach here, Firebase failed and we're in production
-        throw new Error('Firebase Storage is not configured. Check FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, FIREBASE_PRIVATE_KEY, and FIREBASE_STORAGE_BUCKET environment variables.');
+        const errorMsg = getFirebaseError()?.message || 'Firebase not configured';
+        throw new Error(errorMsg);
     } catch (error) {
         const errorMsg = error instanceof Error ? error.message : String(error);
-        console.error('Upload route error:', errorMsg);
+        console.error('❌ Upload route error:', errorMsg);
+        console.error('Full error:', error);
         return NextResponse.json({ 
             error: 'Upload failed',
             message: `فشل رفع الملف: ${errorMsg}`
