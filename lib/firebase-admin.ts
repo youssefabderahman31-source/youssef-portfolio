@@ -17,9 +17,24 @@ const loadServiceAccountFromEnv = () => {
     const projectId = process.env.FIREBASE_PROJECT_ID || process.env.GCLOUD_PROJECT || process.env.PROJECT_ID || '';
     const clientEmail = process.env.FIREBASE_CLIENT_EMAIL || (process.env.client_email as string) || '';
     const privateKeyRaw = process.env.FIREBASE_PRIVATE_KEY || (process.env.private_key as string) || '';
-    if (!privateKeyRaw) return null;
+    
+    const missing: string[] = [];
+    if (!projectId) missing.push('FIREBASE_PROJECT_ID (or GCLOUD_PROJECT or PROJECT_ID)');
+    if (!clientEmail) missing.push('FIREBASE_CLIENT_EMAIL (or client_email)');
+    if (!privateKeyRaw) missing.push('FIREBASE_PRIVATE_KEY (or private_key)');
+    
+    if (missing.length > 0) {
+        console.warn('⚠️  Missing Firebase environment variables:', missing.join(', '));
+        return null;
+    }
+    
     const privateKey = normalizePrivateKey(privateKeyRaw);
-    return projectId && clientEmail && privateKey ? { projectId, clientEmail, privateKey } : null;
+    if (!privateKey) {
+        console.warn('⚠️  Private key failed to normalize');
+        return null;
+    }
+    
+    return { projectId, clientEmail, privateKey };
 };
 
 const loadServiceAccountFromFile = () => {

@@ -59,7 +59,7 @@ export default function Header() {
                 {/* Logo Section */}
                 <Link href="/" className="group flex items-center gap-3" onClick={closeMenu}>
                     <Image
-                        src="/logo.svg"
+                        src="/logo.png"
                         alt="Youssef Abderahman Logo"
                         width={120}
                         height={48}
