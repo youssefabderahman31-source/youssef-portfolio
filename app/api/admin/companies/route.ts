@@ -12,12 +12,13 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  let company: any = undefined;
   try {
     const body = await request.json();
     if (!body || !body.company) {
       return NextResponse.json({ error: 'Invalid payload' }, { status: 400 });
     }
-    const company = body.company;
+    company = body.company;
     // Ensure company has an id when saved locally so client can select it immediately
     if (!company.id) {
       company.id = Date.now().toString();
@@ -25,7 +26,11 @@ export async function POST(request: Request) {
     await saveCompany(company);
     return NextResponse.json({ success: true, id: company.id });
   } catch (error) {
-    console.error('Failed to save company', error);
+    try {
+      console.error('Failed to save company', { company, error: (error as any)?.stack || error });
+    } catch (logErr) {
+      console.error('Failed to save company and failed logging details', logErr, 'original error:', error);
+    }
     return NextResponse.json({ error: 'Failed to save' }, { status: 500 });
   }
 }

@@ -16,6 +16,7 @@
     "@tiptap/extension-image": "^3.19.0",
     "@tiptap/react": "^3.19.0",
     "@tiptap/starter-kit": "^3.19.0",
+    "@supabase/supabase-js": "^2.37.0",
     "clsx": "^2.1.1",
     "framer-motion": "^12.33.0",
     "lucide-react": "^0.563.0",
