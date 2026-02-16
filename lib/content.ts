@@ -1,4 +1,3 @@
-import { db } from './firebase-admin';
 import fs from 'fs/promises';
 import path from 'path';
 
@@ -104,28 +103,10 @@ async function getLocalContent(): Promise<SiteContent> {
 }
 
 export async function getSiteContent(): Promise<SiteContent> {
-    try {
-        if (!db) return await getLocalContent();
-        const doc = await db.collection('settings').doc('site-content').get();
-        if (!doc.exists) {
-            return await getLocalContent();
-        }
-        return doc.data() as SiteContent;
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (_error) {
-        // Return local content silently if Firebase fails (e.g. API not enabled)
-        return await getLocalContent();
-    }
+    return await getLocalContent();
 }
 
 export async function updateSiteContent(newContent: SiteContent): Promise<void> {
-    try {
-        if (!db) throw new Error('Firebase DB not initialized');
-        await db.collection('settings').doc('site-content').set(newContent);
-    } catch (error) {
-        console.error("Failed to update Firebase site content:", error);
-        // Still update local for safety if Firebase fails
-        const CONTENT_FILE = path.join(process.cwd(), 'data', 'site-content.json');
-        await fs.writeFile(CONTENT_FILE, JSON.stringify(newContent, null, 2));
-    }
+    const CONTENT_FILE = path.join(process.cwd(), 'data', 'site-content.json');
+    await fs.writeFile(CONTENT_FILE, JSON.stringify(newContent, null, 2));
 }
