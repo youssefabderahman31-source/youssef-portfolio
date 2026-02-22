@@ -1,6 +1,7 @@
 import fs from 'fs/promises';
 import path from 'path';
 import { createServerSupabaseClient } from './supabase';
+import { createClient as createBrowserSupabaseClient } from '@supabase/supabase-js';
 
 export interface Company {
     id: string;
@@ -43,12 +44,17 @@ async function getLocalCompanies(): Promise<Company[]> {
 }
 
 export async function getCompanies(): Promise<Company[]> {
-    // Try Supabase (server-side) first
+    // Try Supabase (server-side) first. If service role key is missing
+    // fall back to anonymous client (public key) so production can render reads
+    // even when server-side secret isn't set.
     const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    if (!serviceKey) return await getLocalCompanies();
+    const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    const supaUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+
+    if (!serviceKey && !anonKey) return await getLocalCompanies();
 
     try {
-        const supa = createServerSupabaseClient();
+        const supa = serviceKey ? createServerSupabaseClient() : createBrowserSupabaseClient(supaUrl || '', anonKey || '');
         const { data, error } = await supa.from('companies').select('*');
         if (error || !data) return await getLocalCompanies();
         return data.map(mapDbCompany);
@@ -59,13 +65,18 @@ export async function getCompanies(): Promise<Company[]> {
 
 export async function getCompany(slug: string): Promise<Company | undefined> {
     const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    if (!serviceKey) {
+    const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    const supaUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+
+    if (!serviceKey && !anonKey) {
         const companies = await getLocalCompanies();
         return companies.find((c) => c.slug === slug);
     }
     try {
-        const supa = createServerSupabaseClient();
+        const supa = serviceKey ? createServerSupabaseClient() : createBrowserSupabaseClient(supaUrl || '', anonKey || '');
+        console.log(`[getCompany] query slug=${slug} using ${serviceKey ? 'service' : 'anon'}`);
         const { data, error } = await supa.from('companies').select('*').eq('slug', slug).limit(1).maybeSingle();
+        console.log('[getCompany] result', { data: !!data, error: error ? error.message || error : null });
         if (error || !data) {
             const companies = await getLocalCompanies();
             return companies.find((c) => c.slug === slug);
@@ -79,12 +90,15 @@ export async function getCompany(slug: string): Promise<Company | undefined> {
 
 export async function getCompanyById(id: string): Promise<Company | undefined> {
     const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    if (!serviceKey) {
+    const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    const supaUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+
+    if (!serviceKey && !anonKey) {
         const local = await getLocalCompanies();
         return local.find(c => c.id === id);
     }
     try {
-        const supa = createServerSupabaseClient();
+        const supa = serviceKey ? createServerSupabaseClient() : createBrowserSupabaseClient(supaUrl || '', anonKey || '');
         const { data, error } = await supa.from('companies').select('*').eq('id', id).limit(1).maybeSingle();
         if (error || !data) {
             const local = await getLocalCompanies();
@@ -163,9 +177,12 @@ async function getLocalProjects(): Promise<Project[]> {
 
 export async function getProjects(): Promise<Project[]> {
     const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    if (!serviceKey) return await getLocalProjects();
+    const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    const supaUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+
+    if (!serviceKey && !anonKey) return await getLocalProjects();
     try {
-        const supa = createServerSupabaseClient();
+        const supa = serviceKey ? createServerSupabaseClient() : createBrowserSupabaseClient(supaUrl || '', anonKey || '');
         const { data, error } = await supa.from('projects').select('*');
         if (error || !data) return await getLocalProjects();
         return data.map(mapDbProject);
@@ -176,12 +193,15 @@ export async function getProjects(): Promise<Project[]> {
 
 export async function getProjectsByCompany(companyId: string): Promise<Project[]> {
     const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    if (!serviceKey) {
+    const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    const supaUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+
+    if (!serviceKey && !anonKey) {
         const projects = await getLocalProjects();
         return projects.filter(p => p.companyId === companyId);
     }
     try {
-        const supa = createServerSupabaseClient();
+        const supa = serviceKey ? createServerSupabaseClient() : createBrowserSupabaseClient(supaUrl || '', anonKey || '');
         const { data, error } = await supa.from('projects').select('*').eq('company_id', companyId);
         if (error || !data) return await getLocalProjects();
         return data.map(mapDbProject).filter(p => p.companyId === companyId);
@@ -193,12 +213,15 @@ export async function getProjectsByCompany(companyId: string): Promise<Project[]
 
 export async function getProject(slug: string): Promise<Project | undefined> {
     const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    if (!serviceKey) {
+    const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    const supaUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+
+    if (!serviceKey && !anonKey) {
         const projects = await getLocalProjects();
         return projects.find((p) => p.slug === slug);
     }
     try {
-        const supa = createServerSupabaseClient();
+        const supa = serviceKey ? createServerSupabaseClient() : createBrowserSupabaseClient(supaUrl || '', anonKey || '');
         const { data, error } = await supa.from('projects').select('*').eq('slug', slug).limit(1).maybeSingle();
         if (error || !data) {
             const projects = await getLocalProjects();
@@ -213,12 +236,15 @@ export async function getProject(slug: string): Promise<Project | undefined> {
 
 export async function getProjectById(id: string): Promise<Project | undefined> {
     const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    if (!serviceKey) {
+    const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    const supaUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+
+    if (!serviceKey && !anonKey) {
         const local = await getLocalProjects();
         return local.find(p => p.id === id);
     }
     try {
-        const supa = createServerSupabaseClient();
+        const supa = serviceKey ? createServerSupabaseClient() : createBrowserSupabaseClient(supaUrl || '', anonKey || '');
         const { data, error } = await supa.from('projects').select('*').eq('id', id).limit(1).maybeSingle();
         if (error || !data) {
             const local = await getLocalProjects();
