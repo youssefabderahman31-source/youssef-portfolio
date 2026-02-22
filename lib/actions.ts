@@ -74,20 +74,35 @@ export async function removeCompany(formData: FormData) {
         redirect('/admin/dashboard?error=Company%20ID%20is%20required');
     }
 
+    // Get company info BEFORE deletion so we can invalidate its specific page
+    let companySlug: string | null = null;
+    try {
+        const company = await getCompanyById(id);
+        if (company?.slug) {
+            companySlug = company.slug;
+        }
+    } catch (err) {
+        console.log('Could not fetch company info for revalidation:', err);
+    }
+
     try {
         await deleteCompany(id);
+        // Revalidate BEFORE redirect so it executes
+        try {
+            console.log('Revalidating paths after company delete: /, /portfolio' + (companySlug ? `, /portfolio/${companySlug}` : ''));
+            revalidatePath('/');
+            revalidatePath('/portfolio');
+            if (companySlug) {
+                revalidatePath(`/portfolio/${companySlug}`);
+            }
+            console.log('Revalidation triggered successfully (company delete)');
+        } catch (err) {
+            console.error('Revalidation failed (company delete):', err);
+        }
     } catch (error) {
         console.error('Error deleting company:', error);
         // Redirect back to dashboard with an error query so UI can show message
         redirect('/admin/dashboard?error=Failed%20to%20delete%20company');
-    }
-    try {
-        console.log('Revalidating paths after delete: / and /portfolio');
-        revalidatePath('/');
-        revalidatePath('/portfolio');
-        console.log('Revalidation triggered successfully (delete)');
-    } catch (err) {
-        console.error('Revalidation failed (delete):', err);
     }
     redirect('/admin/dashboard');
 }
@@ -147,19 +162,37 @@ export async function removeProject(formData: FormData) {
         redirect('/admin/dashboard?error=Project%20ID%20is%20required');
     }
 
+    // Get project info BEFORE deletion so we can invalidate its company's page
+    let companySlug: string | null = null;
+    try {
+        const project = await getProjectById(id);
+        if (project?.companyId) {
+            const company = await getCompanyById(project.companyId);
+            if (company?.slug) {
+                companySlug = company.slug;
+            }
+        }
+    } catch (err) {
+        console.log('Could not fetch project info for revalidation:', err);
+    }
+
     try {
         await deleteProject(id);
+        // Revalidate BEFORE redirect so it executes
+        try {
+            console.log('Revalidating paths after project delete: /, /portfolio' + (companySlug ? `, /portfolio/${companySlug}` : ''));
+            revalidatePath('/');
+            revalidatePath('/portfolio');
+            if (companySlug) {
+                revalidatePath(`/portfolio/${companySlug}`);
+            }
+            console.log('Revalidation triggered successfully (project delete)');
+        } catch (err) {
+            console.error('Revalidation failed (project delete):', err);
+        }
     } catch (error) {
         console.error('Error deleting project:', error);
         redirect('/admin/dashboard?error=Failed%20to%20delete%20project');
-    }
-    try {
-        console.log('Revalidating paths after project delete: / and /portfolio');
-        revalidatePath('/');
-        revalidatePath('/portfolio');
-        console.log('Revalidation triggered successfully (project delete)');
-    } catch (err) {
-        console.error('Revalidation failed (project delete):', err);
     }
     redirect('/admin/dashboard');
 }
