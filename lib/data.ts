@@ -290,7 +290,7 @@ function mapDbCompany(row: any): Company {
         description_ar: row.description_ar,
         content: row.content,
         content_ar: row.content_ar,
-        documentFile: row.document_file,
+        documentFile: normalizePublicFileUrl(row.document_file),
         documentName: row.document_name,
         documentType: row.document_type,
     } as Company;
@@ -320,12 +320,39 @@ function mapDbProject(row: any): Project {
         description: row.description,
         description_ar: row.description_ar,
         companyId: row.company_id,
-        documentFile: row.document_file,
+        documentFile: normalizePublicFileUrl(row.document_file),
         documentName: row.document_name,
         documentType: row.document_type,
         content: row.content,
         content_ar: row.content_ar,
     } as Project;
+}
+
+function normalizePublicFileUrl(val: any): string | undefined {
+    if (!val) return undefined;
+    if (typeof val !== 'string') return val;
+    // If already an absolute URL, return as-is
+    if (val.startsWith('http://') || val.startsWith('https://')) return val;
+
+    // If it's a relative path like /documents/filename or /uploads/filename,
+    // convert to Supabase public URL when NEXT_PUBLIC_SUPABASE_URL is set.
+    try {
+        const supaUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+        if (!supaUrl) return val;
+
+        if (val.startsWith('/documents/')) {
+            const filename = val.replace(/^\//, ''); // documents/...
+            return `${supaUrl.replace(/\/$/, '')}/storage/v1/object/public/documents/${filename.replace(/^documents\//, '')}`;
+        }
+        if (val.startsWith('/uploads/')) {
+            const filename = val.replace(/^\//, '');
+            return `${supaUrl.replace(/\/$/, '')}/storage/v1/object/public/uploads/${filename.replace(/^uploads\//, '')}`;
+        }
+
+        return val;
+    } catch {
+        return val;
+    }
 }
 
 function toDbProject(p: Project) {
