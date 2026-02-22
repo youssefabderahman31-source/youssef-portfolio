@@ -59,7 +59,18 @@ export async function POST(request: NextRequest) {
                 });
             } catch (err) {
                 console.error('Document upload to Supabase failed, falling back to local file:', err);
-                // fall through to local storage
+                // On serverless platforms (Vercel) the filesystem is read-only.
+                // Return a clear error so the deploy config can be fixed instead
+                // of attempting to write into `public/documents` which will fail.
+                if (process.env.VERCEL === '1' || process.env.NODE_ENV === 'production') {
+                    return NextResponse.json(
+                        {
+                            error: 'Supabase upload failed. Ensure the "documents" bucket exists in Supabase and that SUPABASE_SERVICE_ROLE_KEY is set in Vercel.',
+                        },
+                        { status: 500 }
+                    );
+                }
+                // fall through to local storage for local development
             }
         }
 

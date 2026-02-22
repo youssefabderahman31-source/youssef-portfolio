@@ -13,6 +13,8 @@ Supabase Storage setup
    - Local development uses filesystem `public/uploads` and `public/documents` when `SUPABASE_SERVICE_ROLE_KEY` is not present.
    - On production (Vercel), the app uses `SUPABASE_SERVICE_ROLE_KEY` to upload files to Supabase Storage.
    - Ensure your buckets exist and CORS / public settings match your needs.
+   - After creating buckets and setting environment variables on Vercel, perform a redeploy so server code picks up the `SUPABASE_SERVICE_ROLE_KEY` and the app's server-side logic (including revalidation) is active.
+   - If admin changes don't appear immediately on the public site, check Vercel deployment logs for `Revalidating paths` messages (they indicate the server attempted to revalidate cached pages). If you see `Revalidation failed` errors, paste the log here for help.
 
 4. Alternative providers
    - For heavy production usage and advanced image transformations, consider Cloudinary or S3.
