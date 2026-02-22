@@ -16,6 +16,12 @@ export default function PDFViewer({ fileUrl, fileName, fileType }: PDFViewerProp
             return;
         }
 
+        // If it's already an absolute URL (Supabase), open directly
+        if (fileUrl.startsWith('http://') || fileUrl.startsWith('https://')) {
+            window.open(fileUrl, "_blank");
+            return;
+        }
+
         // Extract filename from URL
         const filename = fileUrl.split('/').pop() || 'document';
         
@@ -61,11 +67,15 @@ export default function PDFViewer({ fileUrl, fileName, fileType }: PDFViewerProp
         );
     }
 
-    // Extract filename and determine endpoint
-    const filename = fileUrl.split('/').pop() || '';
-    const isDocument = fileUrl.includes('/documents/');
-    const endpoint = isDocument ? '/api/documents/view' : '/api/files/view';
-    const apiUrl = `${endpoint}?file=${encodeURIComponent(filename)}`;
+    // If fileUrl is already an absolute URL (Supabase), use it directly
+    // Otherwise, route through local API endpoint
+    let iframeUrl = fileUrl;
+    if (!fileUrl.startsWith('http://') && !fileUrl.startsWith('https://')) {
+        const filename = fileUrl.split('/').pop() || '';
+        const isDocument = fileUrl.includes('/documents/');
+        const endpoint = isDocument ? '/api/documents/view' : '/api/files/view';
+        iframeUrl = `${endpoint}?file=${encodeURIComponent(filename)}`;
+    }
 
     return (
         <>
@@ -73,7 +83,7 @@ export default function PDFViewer({ fileUrl, fileName, fileType }: PDFViewerProp
             <div className="hidden md:block w-full bg-black border border-brand-yellow/20 rounded-lg overflow-visible">
                 <div className="relative w-full h-[700px] overflow-hidden">
                     <iframe
-                        src={`${apiUrl}#toolbar=1&navpanes=0`}
+                        src={`${iframeUrl}#toolbar=1&navpanes=0`}
                         className="absolute inset-0 w-full h-full border-0"
                         title={fileName}
                     />
