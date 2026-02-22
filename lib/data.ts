@@ -64,27 +64,29 @@ export async function getCompanies(): Promise<Company[]> {
 }
 
 export async function getCompany(slug: string): Promise<Company | undefined> {
+    // Decode slug in case it arrives URL-encoded (Next.js sometimes passes raw slug)
+    const decodedSlug = decodeURIComponent(slug);
     const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
     const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
     const supaUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 
     if (!serviceKey && !anonKey) {
         const companies = await getLocalCompanies();
-        return companies.find((c) => c.slug === slug);
+        return companies.find((c) => c.slug === decodedSlug);
     }
     try {
         const supa = serviceKey ? createServerSupabaseClient() : createBrowserSupabaseClient(supaUrl || '', anonKey || '');
-        console.log(`[getCompany] query slug=${slug} using ${serviceKey ? 'service' : 'anon'}`);
-        const { data, error } = await supa.from('companies').select('*').eq('slug', slug).limit(1).maybeSingle();
+        console.log(`[getCompany] query slug=${decodedSlug} (raw: ${slug}) using ${serviceKey ? 'service' : 'anon'}`);
+        const { data, error } = await supa.from('companies').select('*').eq('slug', decodedSlug).limit(1).maybeSingle();
         console.log('[getCompany] result', { data: !!data, error: error ? error.message || error : null });
         if (error || !data) {
             const companies = await getLocalCompanies();
-            return companies.find((c) => c.slug === slug);
+            return companies.find((c) => c.slug === decodedSlug);
         }
         return mapDbCompany(data as any);
     } catch {
         const companies = await getLocalCompanies();
-        return companies.find((c) => c.slug === slug);
+        return companies.find((c) => c.slug === decodedSlug);
     }
 }
 
@@ -212,25 +214,27 @@ export async function getProjectsByCompany(companyId: string): Promise<Project[]
 }
 
 export async function getProject(slug: string): Promise<Project | undefined> {
+    // Decode slug in case it arrives URL-encoded
+    const decodedSlug = decodeURIComponent(slug);
     const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
     const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
     const supaUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 
     if (!serviceKey && !anonKey) {
         const projects = await getLocalProjects();
-        return projects.find((p) => p.slug === slug);
+        return projects.find((p) => p.slug === decodedSlug);
     }
     try {
         const supa = serviceKey ? createServerSupabaseClient() : createBrowserSupabaseClient(supaUrl || '', anonKey || '');
-        const { data, error } = await supa.from('projects').select('*').eq('slug', slug).limit(1).maybeSingle();
+        const { data, error } = await supa.from('projects').select('*').eq('slug', decodedSlug).limit(1).maybeSingle();
         if (error || !data) {
             const projects = await getLocalProjects();
-            return projects.find((p) => p.slug === slug);
+            return projects.find((p) => p.slug === decodedSlug);
         }
         return mapDbProject(data as any);
     } catch {
         const projects = await getLocalProjects();
-        return projects.find((p) => p.slug === slug);
+        return projects.find((p) => p.slug === decodedSlug);
     }
 }
 
