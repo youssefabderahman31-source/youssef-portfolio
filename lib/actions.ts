@@ -3,7 +3,7 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
-import { saveCompany, deleteCompany, Company, saveProject, deleteProject, Project, getCompanyById } from './data';
+import { saveCompany, deleteCompany, Company, saveProject, deleteProject, Project, getCompanyById, getProjectById } from './data';
 import { updateSiteContent, SiteContent } from './content';
 
 export async function login(prevState: { message: string } | null | undefined, formData: FormData) {
