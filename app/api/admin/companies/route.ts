@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getCompanies, saveCompany } from '@/lib/data';
+import { revalidatePublicPages } from '@/lib/revalidate';
 
 export async function GET() {
   try {
@@ -23,7 +24,17 @@ export async function POST(request: Request) {
     if (!company.id) {
       company.id = Date.now().toString();
     }
+    // Ensure slug exists (mirror behavior in server actions)
+    if (!company.slug && company.name) {
+      company.slug = company.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+    }
     await saveCompany(company);
+    // Revalidate public pages so change appears immediately
+    try {
+      await revalidatePublicPages(company.slug);
+    } catch (err) {
+      console.error('Failed to revalidate after saving company:', err);
+    }
     return NextResponse.json({ success: true, id: company.id });
   } catch (error) {
     try {

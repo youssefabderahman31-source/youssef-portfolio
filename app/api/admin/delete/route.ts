@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import { deleteCompany, deleteProject } from '@/lib/data';
+import { deleteCompany, deleteProject, getCompanyById, getProjectById } from '@/lib/data';
+import { revalidatePublicPages } from '@/lib/revalidate';
 
 export async function POST(request: Request) {
   try {
@@ -18,12 +19,34 @@ export async function POST(request: Request) {
     }
 
     try {
+      let slug: string | undefined = undefined;
       if (type === 'company') {
+        try {
+          const company = await getCompanyById(id);
+          slug = company?.slug;
+        } catch (e) {
+          console.log('Could not fetch company for revalidation before delete', e);
+        }
         await deleteCompany(id);
       } else if (type === 'project') {
+        try {
+          const project = await getProjectById(id);
+          if (project?.companyId) {
+            const company = await getCompanyById(project.companyId);
+            slug = company?.slug;
+          }
+        } catch (e) {
+          console.log('Could not fetch project/company for revalidation before delete', e);
+        }
         await deleteProject(id);
       } else {
         return NextResponse.json({ error: 'Invalid type' }, { status: 400 });
+      }
+
+      try {
+        await revalidatePublicPages(slug);
+      } catch (err) {
+        console.error('Failed to revalidate after delete:', err);
       }
 
       return NextResponse.json({ success: true, message: 'Deleted successfully' });

@@ -2,8 +2,9 @@
 
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { revalidatePath } from 'next/cache';
+// central revalidation helper used below
 import { saveCompany, deleteCompany, Company, saveProject, deleteProject, Project, getCompanyById, getProjectById } from './data';
+import { revalidatePublicPages } from './revalidate';
 import { updateSiteContent, SiteContent } from './content';
 
 export async function login(prevState: { message: string } | null | undefined, formData: FormData) {
@@ -50,11 +51,7 @@ export async function createOrUpdateCompany(company: Company) {
     await saveCompany(company);
     // Revalidate public pages so changes appear immediately
     try {
-        console.log('Revalidating paths: / and /portfolio' + (company.slug ? ` and /portfolio/${company.slug}` : ''));
-        revalidatePath('/');
-        revalidatePath('/portfolio');
-        if (company.slug) revalidatePath(`/portfolio/${company.slug}`);
-        console.log('Revalidation triggered successfully');
+        await revalidatePublicPages(company.slug);
     } catch (err) {
         console.error('Revalidation failed:', err);
     }
@@ -89,13 +86,7 @@ export async function removeCompany(formData: FormData) {
         await deleteCompany(id);
         // Revalidate BEFORE redirect so it executes
         try {
-            console.log('Revalidating paths after company delete: /, /portfolio' + (companySlug ? `, /portfolio/${companySlug}` : ''));
-            revalidatePath('/');
-            revalidatePath('/portfolio');
-            if (companySlug) {
-                revalidatePath(`/portfolio/${companySlug}`);
-            }
-            console.log('Revalidation triggered successfully (company delete)');
+            await revalidatePublicPages(companySlug || undefined);
         } catch (err) {
             console.error('Revalidation failed (company delete):', err);
         }
@@ -135,16 +126,8 @@ export async function saveProjectAction(project: Project) {
 
     await saveProject(project);
     try {
-        console.log('Revalidating paths after project save: / and /portfolio');
-        revalidatePath('/');
-        revalidatePath('/portfolio');
-        // Revalidate the company page for this project
         const company = await getCompanyById(project.companyId);
-        if (company?.slug) {
-            revalidatePath(`/portfolio/${company.slug}`);
-            console.log(`Revalidated company page: /portfolio/${company.slug}`);
-        }
-        console.log('Revalidation triggered successfully (project save)');
+        await revalidatePublicPages(company?.slug);
     } catch (err) {
         console.error('Revalidation failed (project save):', err);
     }
@@ -180,13 +163,7 @@ export async function removeProject(formData: FormData) {
         await deleteProject(id);
         // Revalidate BEFORE redirect so it executes
         try {
-            console.log('Revalidating paths after project delete: /, /portfolio' + (companySlug ? `, /portfolio/${companySlug}` : ''));
-            revalidatePath('/');
-            revalidatePath('/portfolio');
-            if (companySlug) {
-                revalidatePath(`/portfolio/${companySlug}`);
-            }
-            console.log('Revalidation triggered successfully (project delete)');
+            await revalidatePublicPages(companySlug || undefined);
         } catch (err) {
             console.error('Revalidation failed (project delete):', err);
         }

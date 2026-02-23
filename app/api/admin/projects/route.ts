@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
-import { saveProject } from '@/lib/data';
+import { saveProject, getCompanyById } from '@/lib/data';
 import { cookies } from 'next/headers';
+import { revalidatePublicPages } from '@/lib/revalidate';
 
 export async function POST(req: Request) {
   const cookieStore = await cookies();
@@ -18,6 +19,13 @@ export async function POST(req: Request) {
     if (!project.companyId) return NextResponse.json({ error: 'Company is required' }, { status: 400 });
 
     await saveProject(project);
+    // Revalidate the portfolio page for this project's company
+    try {
+      const company = await getCompanyById(project.companyId);
+      await revalidatePublicPages(company?.slug);
+    } catch (err) {
+      console.error('Failed to revalidate after saving project:', err);
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {
