@@ -13,7 +13,7 @@ function supabaseHostnameFromEnv(): string | undefined {
 
 const supaHost = supabaseHostnameFromEnv();
 
-const remotePatterns: { protocol: string; hostname: string }[] = [
+const remotePatterns: any[] = [
   { protocol: 'https', hostname: 'storage.googleapis.com' },
   { protocol: 'https', hostname: 'image2url.com' },
 ];
