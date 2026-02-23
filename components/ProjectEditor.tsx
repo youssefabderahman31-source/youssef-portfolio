@@ -60,6 +60,16 @@ export default function ProjectEditor({ project, isNew = false }: Props) {
         }
       : null
   );
+  const [documentFileAr, setDocumentFileAr] = useState<FileUploadState | null>(
+    project?.documentFileAr
+      ? {
+          url: project.documentFileAr,
+          name: project.documentNameAr || "الملف",
+          type: project.documentTypeAr || "",
+          size: 0,
+        }
+      : null
+  );
 
   const [isUploading, setIsUploading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -84,7 +94,7 @@ export default function ProjectEditor({ project, isNew = false }: Props) {
     loadCompanies();
   }, []);
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, lang: 'en'|'ar' = 'en') => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -116,6 +126,15 @@ export default function ProjectEditor({ project, isNew = false }: Props) {
         type: data.type,
         size: data.size,
       });
+
+      if (lang === 'ar') {
+        setDocumentFileAr({
+          url: data.url,
+          name: data.name,
+          type: data.type,
+          size: data.size,
+        });
+      }
 
       setSuccess("تم رفع الملف بنجاح!");
       setTimeout(() => setSuccess(""), 3000);
@@ -224,6 +243,9 @@ export default function ProjectEditor({ project, isNew = false }: Props) {
         documentFile: documentFile?.url,
         documentName: documentFile?.name,
         documentType: documentFile?.type,
+        documentFileAr: documentFileAr?.url,
+        documentNameAr: documentFileAr?.name,
+        documentTypeAr: documentFileAr?.type,
         content: "",
         content_ar: "",
       };
@@ -530,14 +552,36 @@ export default function ProjectEditor({ project, isNew = false }: Props) {
             </div>
           ) : (
             <label className="cursor-pointer block">
-              <input
-                ref={fileInputRef}
-                type="file"
-                onChange={handleFileUpload}
-                disabled={isUploading}
-                accept=".pdf,.docx,.doc,.xlsx,.xls,.pptx,.ppt"
-                className="hidden"
-              />
+              <div className="grid md:grid-cols-2 gap-4">
+                <label className="cursor-pointer block">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    onChange={(e) => handleFileUpload(e, 'en')}
+                    disabled={isUploading}
+                    accept=".pdf,.docx,.doc,.xlsx,.xls,.pptx,.ppt"
+                    className="hidden"
+                  />
+                  <div className="border-2 border-dashed border-white/20 rounded-lg p-6 text-center hover:border-brand-yellow hover:bg-brand-yellow/5 transition-colors">
+                    <p className="text-white font-bold mb-1">الملف (EN)</p>
+                    <p className="text-white/60 text-sm">PDF, Word, Excel أو PowerPoint</p>
+                  </div>
+                </label>
+
+                <label className="cursor-pointer block">
+                  <input
+                    type="file"
+                    onChange={(e) => handleFileUpload(e, 'ar')}
+                    disabled={isUploading}
+                    accept=".pdf,.docx,.doc,.xlsx,.xls,.pptx,.ppt"
+                    className="hidden"
+                  />
+                  <div className="border-2 border-dashed border-white/20 rounded-lg p-6 text-center hover:border-brand-yellow hover:bg-brand-yellow/5 transition-colors">
+                    <p className="text-white font-bold mb-1">الملف (AR)</p>
+                    <p className="text-white/60 text-sm">أضف نسخة عربية من الملف إذا وُجدت</p>
+                  </div>
+                </label>
+              </div>
               <div className="border-2 border-dashed border-white/20 rounded-lg p-8 text-center hover:border-brand-yellow hover:bg-brand-yellow/5 transition-colors">
                 <FileText size={40} className="mx-auto mb-3 text-brand-yellow" />
                 <p className="text-white font-bold mb-1">اختر ملفك</p>

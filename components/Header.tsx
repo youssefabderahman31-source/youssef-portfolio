@@ -125,42 +125,56 @@ export default function Header() {
             <AnimatePresence>
                 {isOpen && (
                     <motion.div
-                        initial={{ opacity: 0, x: "100%" }}
+                        initial={{ opacity: 0, x: isAr ? "-100%" : "100%" }}
                         animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: "100%" }}
+                        exit={{ opacity: 0, x: isAr ? "-100%" : "100%" }}
                         transition={{ type: "spring", damping: 25, stiffness: 200 }}
-                        className="fixed inset-0 bg-black z-[90] md:hidden flex flex-col justify-center px-12"
+                        className="fixed inset-0 bg-black/80 z-[90] md:hidden flex"
+                        onClick={closeMenu}
+                        role="dialog"
+                        aria-modal="true"
                     >
-                        <div className="space-y-12">
-                            {navItems.map((item, idx) => (
-                                <motion.div
-                                    key={item.path}
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: 0.1 * idx }}
-                                >
-                                    <Link
-                                        href={item.path}
-                                        onClick={closeMenu}
-                                        className={clsx(
-                                            "text-5xl font-serif font-bold tracking-tighter block",
-                                            pathname === item.path ? "text-gold" : "text-white/20 italic"
-                                        )}
-                                    >
-                                        {t(item.name)}
-                                    </Link>
-                                </motion.div>
-                            ))}
-                        </div>
+                        {/* Clickable overlay area to close menu */}
+                        <div className="flex-1" />
 
-                        <div className="absolute bottom-20 left-12 right-12 flex justify-between items-center border-t border-white/5 pt-12 gap-4">
-                            <button
-                                onClick={() => { setLanguage(isAr ? "en" : "ar"); closeMenu(); }}
-                                className="flex-1 text-sm font-bold uppercase tracking-[0.4em] bg-gradient-to-r from-brand-yellow to-yellow-400 text-black px-6 py-4 rounded-lg shadow-2xl hover:shadow-brand-yellow/50 transition-all duration-300"
-                            >
-                                {isAr ? "🇬🇧 English" : "🇸🇦 العربية"}
-                            </button>
-                            <span className="text-[10px] text-white/10 uppercase tracking-widest">© 2026</span>
+                        {/* Menu panel */}
+                        <div className="w-10/12 max-w-xs bg-black p-8 flex flex-col justify-center" onClick={(e) => e.stopPropagation()}>
+                            <div className="flex justify-end mb-6">
+                                <button onClick={closeMenu} aria-label="Close menu" className="text-white/50 hover:text-white">
+                                    ✕
+                                </button>
+                            </div>
+                            <div className="space-y-8">
+                                {navItems.map((item, idx) => (
+                                    <motion.div
+                                        key={item.path}
+                                        initial={{ opacity: 0, y: 20 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ delay: 0.05 * idx }}
+                                    >
+                                        <Link
+                                            href={item.path}
+                                            onClick={closeMenu}
+                                            className={clsx(
+                                                "text-3xl font-serif font-bold tracking-tight block",
+                                                pathname === item.path ? "text-gold" : "text-white/60"
+                                            )}
+                                        >
+                                            {t(item.name)}
+                                        </Link>
+                                    </motion.div>
+                                ))}
+
+                                <div className="pt-6 border-t border-white/5">
+                                    <button
+                                        onClick={() => { setLanguage(isAr ? "en" : "ar"); closeMenu(); }}
+                                        className="w-full text-sm font-bold uppercase tracking-[0.4em] bg-gradient-to-r from-brand-yellow to-yellow-400 text-black px-4 py-3 rounded-lg shadow-2xl hover:shadow-brand-yellow/50 transition-all duration-300"
+                                    >
+                                        {isAr ? "🇬🇧 English" : "🇸🇦 العربية"}
+                                    </button>
+                                    <p className="text-[10px] text-white/30 uppercase tracking-widest mt-3">© 2026</p>
+                                </div>
+                            </div>
                         </div>
                     </motion.div>
                 )}

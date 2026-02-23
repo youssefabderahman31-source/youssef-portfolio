@@ -25,8 +25,11 @@ export interface Project {
     description_ar?: string;
     companyId: string;
     documentFile?: string;
+    documentFileAr?: string;
     documentName?: string;
+    documentNameAr?: string;
     documentType?: string;
+    documentTypeAr?: string;
     content?: string;
     content_ar?: string;
 }
@@ -350,9 +353,80 @@ function mapDbProject(row: any): Project {
         description: row.description,
         description_ar: row.description_ar,
         companyId: row.company_id,
-        documentFile: normalizePublicFileUrl(row.document_file),
-        documentName: row.document_name,
-        documentType: row.document_type,
+        // document_file may be stored as a simple string or as a JSON object string
+        documentFile: (() => {
+            try {
+                if (!row.document_file) return undefined;
+                if (typeof row.document_file === 'string' && row.document_file.trim().startsWith('{')) {
+                    const parsed = JSON.parse(row.document_file);
+                    return normalizePublicFileUrl(parsed?.en || parsed?.en ?? undefined);
+                }
+                return normalizePublicFileUrl(row.document_file);
+            } catch {
+                return normalizePublicFileUrl(row.document_file);
+            }
+        })(),
+        documentFileAr: (() => {
+            try {
+                if (!row.document_file) return undefined;
+                if (typeof row.document_file === 'string' && row.document_file.trim().startsWith('{')) {
+                    const parsed = JSON.parse(row.document_file);
+                    return normalizePublicFileUrl(parsed?.ar || undefined);
+                }
+                return undefined;
+            } catch {
+                return undefined;
+            }
+        })(),
+        // document name/type may also be serialized as JSON when multi-lang
+        documentName: (() => {
+            try {
+                if (!row.document_name) return undefined;
+                if (typeof row.document_name === 'string' && row.document_name.trim().startsWith('{')) {
+                    const parsed = JSON.parse(row.document_name);
+                    return parsed?.en || undefined;
+                }
+                return row.document_name;
+            } catch {
+                return row.document_name;
+            }
+        })(),
+        documentNameAr: (() => {
+            try {
+                if (!row.document_name) return undefined;
+                if (typeof row.document_name === 'string' && row.document_name.trim().startsWith('{')) {
+                    const parsed = JSON.parse(row.document_name);
+                    return parsed?.ar || undefined;
+                }
+                return undefined;
+            } catch {
+                return undefined;
+            }
+        })(),
+        documentType: (() => {
+            try {
+                if (!row.document_type) return undefined;
+                if (typeof row.document_type === 'string' && row.document_type.trim().startsWith('{')) {
+                    const parsed = JSON.parse(row.document_type);
+                    return parsed?.en || undefined;
+                }
+                return row.document_type;
+            } catch {
+                return row.document_type;
+            }
+        })(),
+        documentTypeAr: (() => {
+            try {
+                if (!row.document_type) return undefined;
+                if (typeof row.document_type === 'string' && row.document_type.trim().startsWith('{')) {
+                    const parsed = JSON.parse(row.document_type);
+                    return parsed?.ar || undefined;
+                }
+                return undefined;
+            } catch {
+                return undefined;
+            }
+        })(),
         content: row.content,
         content_ar: row.content_ar,
     } as Project;
@@ -393,9 +467,10 @@ function toDbProject(p: Project) {
         description: p.description,
         description_ar: p.description_ar,
         company_id: p.companyId,
-        document_file: p.documentFile,
-        document_name: p.documentName,
-        document_type: p.documentType,
+        // If both language variants exist, store as JSON string to avoid DB schema migration
+        document_file: (p.documentFileAr ? JSON.stringify({ en: p.documentFile, ar: p.documentFileAr }) : p.documentFile) as any,
+        document_name: (p.documentNameAr ? JSON.stringify({ en: p.documentName, ar: p.documentNameAr }) : p.documentName) as any,
+        document_type: (p.documentTypeAr ? JSON.stringify({ en: p.documentType, ar: p.documentTypeAr }) : p.documentType) as any,
         content: p.content,
         content_ar: p.content_ar,
     };
