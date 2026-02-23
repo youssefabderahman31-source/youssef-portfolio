@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { Download, Eye, FileText, AlertCircle } from "lucide-react";
 
 interface PDFViewerProps {
@@ -12,11 +13,11 @@ interface PDFViewerProps {
 }
 
 export default function PDFViewer({ fileUrl, fileName, fileType, fileUrlAr, fileNameAr, fileTypeAr }: PDFViewerProps) {
-    const [chosenUrl, setChosenUrl] = React.useState<string | undefined>(fileUrl);
-    const [chosenName, setChosenName] = React.useState<string | undefined>(fileName);
-    const [chosenType, setChosenType] = React.useState<string | undefined>(fileType);
+    const [chosenUrl, setChosenUrl] = useState<string | undefined>(fileUrl);
+    const [chosenName, setChosenName] = useState<string | undefined>(fileName);
+    const [chosenType, setChosenType] = useState<string | undefined>(fileType);
 
-    React.useEffect(() => {
+    useEffect(() => {
         try {
             const lang = (navigator.language || (navigator as any).userLanguage || 'en').startsWith('ar') ? 'ar' : 'en';
             if (lang === 'ar' && fileUrlAr) {

@@ -359,7 +359,7 @@ function mapDbProject(row: any): Project {
                 if (!row.document_file) return undefined;
                 if (typeof row.document_file === 'string' && row.document_file.trim().startsWith('{')) {
                     const parsed = JSON.parse(row.document_file);
-                    return normalizePublicFileUrl(parsed?.en || parsed?.en ?? undefined);
+                    return normalizePublicFileUrl(parsed?.en ?? undefined);
                 }
                 return normalizePublicFileUrl(row.document_file);
             } catch {
