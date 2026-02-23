@@ -315,7 +315,7 @@ function mapDbCompany(row: any): Company {
         id: row.id,
         slug: row.slug,
         name: row.name,
-        logo: row.logo,
+        logo: normalizePublicFileUrl(row.logo),
         description: row.description,
         description_ar: row.description_ar,
         content: row.content,
