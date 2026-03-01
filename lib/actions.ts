@@ -8,11 +8,14 @@ import { revalidatePublicPages } from './revalidate';
 import { updateSiteContent, SiteContent } from './content';
 
 export async function login(prevState: { message: string } | null | undefined, formData: FormData) {
-    const password = formData.get('password');
+    const password = formData.get('password') as string | null;
 
-    // Hardcoded demo password
-    // In a real env, check process.env.ADMIN_PASSWORD
-    if (password === 'admin123') {
+    // Admin password stored encoded in-files (base64) to avoid plaintext.
+    // 'NDQ0Nw==' is base64 for '4447'. For higher security, move to env var.
+    const ADMIN_PASSWORD_ENCODED = 'NDQ0Nw==';
+    const expectedPassword = Buffer.from(ADMIN_PASSWORD_ENCODED, 'base64').toString('utf8');
+
+    if (password && password === expectedPassword) {
         (await cookies()).set('admin_token', 'authorized', {
             secure: process.env.NODE_ENV === 'production',
             httpOnly: true,
